@@ -1,0 +1,9 @@
+# Suppress data races inside third-party libraries that use their own
+# internal synchronization (which TSan cannot see through). These are
+# not bugs in rcat — chafa spawns a glib thread pool for image
+# processing, and glib's malloc/free interactions with the main thread
+# trip up TSan even though they're correctly synchronized internally.
+race:libchafa
+race:libglib-2.0
+called_from_lib:libchafa
+called_from_lib:libglib-2.0

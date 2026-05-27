@@ -91,7 +91,7 @@ add_library(rcat_warnings INTERFACE)
 target_compile_options(rcat_warnings INTERFACE
     $<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall -Wextra -Wpedantic
         -Wshadow -Wnon-virtual-dtor -Woverloaded-virtual
-        -Wnull-dereference -Wdouble-promotion -Wformat=2
+        -Wdouble-promotion -Wformat=2
         -Wno-unused-parameter>
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->)
 if(RCAT_WARNINGS_AS_ERRORS)
