@@ -26,8 +26,6 @@ static int g_failed = 0;
 int main() {
     using namespace rcat;
 
-    CHECK(image_rendering_available());
-
     // Direct image render — small 16x16 PNG fixture
     {
         std::string path = std::string(RCAT_TEST_FIXTURE_DIR) + "/logo.png";
@@ -116,7 +114,7 @@ int main() {
     // Remote URL with --allow-web but pointing at a non-resolvable host:
     // should NOT crash, should fall back to a label. (Uses .invalid TLD so
     // DNS reliably fails offline.)
-    if (web_fetch_available()) {
+    {
         RenderOptions o;
         o.caps.is_tty = false;
         o.caps.columns = 60;

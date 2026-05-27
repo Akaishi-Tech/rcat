@@ -18,12 +18,6 @@ struct ImageRenderResult {
     std::string error;
 };
 
-// True when the build was compiled with chafa support.
-[[nodiscard]] bool image_rendering_available();
-
-// True when libcurl is linked in (i.e. --allow-web can actually fetch).
-[[nodiscard]] bool web_fetch_available();
-
 // Decode `path` (any format stb_image supports — PNG/JPG/GIF/BMP/PSD/TGA/PNM)
 // and render to at most max_width x max_height terminal cells, preserving
 // aspect ratio. `color` controls how many colors the canvas emits — anything
@@ -40,10 +34,10 @@ struct ImageRenderResult {
                                                    int max_width_cells, int max_height_cells,
                                                    ColorMode color);
 
-// Fetch a URL into memory using libcurl. Returns success=false if libcurl
-// is not compiled in, the URL fails, the response is too large, or the
-// transfer takes longer than timeout_seconds. Caps the body at max_bytes to
-// keep a hostile or runaway server from filling memory.
+// Fetch a URL into memory using libcurl. Returns success=false if the
+// URL fails, the response is too large, or the transfer takes longer than
+// timeout_seconds. Caps the body at max_bytes to keep a hostile or
+// runaway server from filling memory.
 struct WebFetchResult {
     bool success = false;
     std::string bytes;

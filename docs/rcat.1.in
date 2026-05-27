@@ -33,17 +33,14 @@ to print every recognised alias.
 Code fences inside Markdown are syntax-highlighted with the same engine.
 Images referenced from Markdown are decoded and rendered as Unicode
 half-block art via
-.B chafa
-when that library was linked at build time. Image paths are resolved
-relative to each
+.BR chafa .
+Image paths are resolved relative to each
 .IR FILE 's
 directory; remote
 .B http(s)
 URLs are only fetched when
 .B \-\-allow\-web
-is given (and
-.B libcurl
-was linked at build time).
+is given.
 .SH OPTIONS
 .TP
 .BR \-V ", " \-\-version
@@ -96,9 +93,7 @@ Skip inline images even when image rendering was compiled in.
 .B \-\-allow\-web
 Download and render
 .B http(s)
-image URLs. Off by default. Requires that
-.B libcurl
-was linked at build time. Each fetch is capped at the
+image URLs. Off by default. Each fetch is capped at the
 .B \-\-web\-timeout
 seconds and 16 MiB.
 .TP

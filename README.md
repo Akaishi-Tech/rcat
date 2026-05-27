@@ -56,9 +56,9 @@ Build requirements:
 | CMake | ≥ 3.14 |
 | [md4c] | required |
 | [argparse] | required (header-only, find via CMake) |
-| libintl / gettext | optional, enables translated messages |
-| [chafa] + [stb\_image.h] | optional, enables inline image rendering |
-| libcurl | optional, enables `--allow-web` |
+| libintl / gettext | required (translated messages + .mo compilation) |
+| [chafa] + [stb\_image.h] | required (inline image rendering) |
+| libcurl | required (`--allow-web` remote image fetch) |
 
 [argparse]: https://github.com/p-ranav/argparse
 [stb\_image.h]: https://github.com/nothings/stb
@@ -69,12 +69,12 @@ cmake --build build -j
 sudo cmake --install build           # installs to /usr/local by default
 ```
 
-To disable optional features at configure time:
+To skip the test suite or man-page install:
 
 ```sh
 cmake -S . -B build \
-    -DRCAT_ENABLE_IMAGES=OFF \
-    -DRCAT_BUILD_TESTS=OFF
+    -DRCAT_BUILD_TESTS=OFF \
+    -DRCAT_INSTALL_MAN=OFF
 ```
 
 ### Distribution packages

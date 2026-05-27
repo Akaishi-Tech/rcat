@@ -42,7 +42,6 @@ include(CMakeDependentOption)
 # Options
 # ----------------------------------------------------------------------------
 option(RCAT_BUILD_TESTS       "Build rcat tests"                            ON)
-option(RCAT_ENABLE_IMAGES     "Enable inline image rendering (chafa + stb)" ON)
 option(RCAT_INSTALL_MAN       "Install the man page"                        ON)
 option(RCAT_WARNINGS_AS_ERRORS "Treat compiler warnings as errors"          OFF)
 option(RCAT_ENABLE_ASAN       "Build with AddressSanitizer + UBSan"         OFF)
@@ -163,89 +162,61 @@ target_link_libraries(rcat_core
 # Internationalization: glibc has gettext in libc; some platforms (musl,
 # macOS) need a separate libintl. find_package(Intl) handles both.
 # ----------------------------------------------------------------------------
-find_package(Intl)
-if(Intl_FOUND)
-    target_compile_definitions(rcat_core PUBLIC
-        RCAT_HAVE_GETTEXT=1
-        RCAT_LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}")
-    if(Intl_LIBRARIES)
-        target_link_libraries(rcat_core PUBLIC ${Intl_LIBRARIES})
-    endif()
-    if(Intl_INCLUDE_DIRS)
-        target_include_directories(rcat_core PUBLIC ${Intl_INCLUDE_DIRS})
-    endif()
-    message(STATUS "rcat: i18n enabled (locale catalogs install to "
-                   "${CMAKE_INSTALL_FULL_LOCALEDIR})")
-else()
-    message(STATUS "rcat: libintl not found; i18n disabled, all messages stay in English")
+find_package(Intl REQUIRED)
+target_compile_definitions(rcat_core PUBLIC
+    RCAT_LOCALEDIR="${CMAKE_INSTALL_FULL_LOCALEDIR}")
+if(Intl_LIBRARIES)
+    target_link_libraries(rcat_core PUBLIC ${Intl_LIBRARIES})
 endif()
+if(Intl_INCLUDE_DIRS)
+    target_include_directories(rcat_core PUBLIC ${Intl_INCLUDE_DIRS})
+endif()
+message(STATUS "rcat: i18n enabled (locale catalogs install to "
+               "${CMAKE_INSTALL_FULL_LOCALEDIR})")
 
 # Compile .po -> .mo into build/locale/<lang>/LC_MESSAGES/rcat.mo and install
 # them. Also write the same tree under build/locale so the binary can pick
 # them up via RCAT_LOCALEDIR env when running uninstalled.
-find_package(Gettext)
+find_package(Gettext REQUIRED)
 set(RCAT_LANGUAGES zh_CN es ja de)
-if(Intl_FOUND AND GETTEXT_FOUND)
-    set(RCAT_MO_FILES)
-    foreach(lang IN LISTS RCAT_LANGUAGES)
-        set(po_file ${CMAKE_CURRENT_SOURCE_DIR}/po/${lang}.po)
-        set(mo_dir  ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}/LC_MESSAGES)
-        set(mo_file ${mo_dir}/rcat.mo)
-        add_custom_command(
-            OUTPUT ${mo_file}
-            COMMAND ${CMAKE_COMMAND} -E make_directory ${mo_dir}
-            COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --check-format
-                    -o ${mo_file} ${po_file}
-            DEPENDS ${po_file}
-            COMMENT "msgfmt ${lang}.po -> rcat.mo"
-            VERBATIM)
-        list(APPEND RCAT_MO_FILES ${mo_file})
-        install(FILES ${mo_file}
-                DESTINATION ${CMAKE_INSTALL_LOCALEDIR}/${lang}/LC_MESSAGES)
-    endforeach()
-    add_custom_target(rcat_translations ALL DEPENDS ${RCAT_MO_FILES})
-endif()
+set(RCAT_MO_FILES)
+foreach(lang IN LISTS RCAT_LANGUAGES)
+    set(po_file ${CMAKE_CURRENT_SOURCE_DIR}/po/${lang}.po)
+    set(mo_dir  ${CMAKE_CURRENT_BINARY_DIR}/locale/${lang}/LC_MESSAGES)
+    set(mo_file ${mo_dir}/rcat.mo)
+    add_custom_command(
+        OUTPUT ${mo_file}
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${mo_dir}
+        COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} --check-format
+                -o ${mo_file} ${po_file}
+        DEPENDS ${po_file}
+        COMMENT "msgfmt ${lang}.po -> rcat.mo"
+        VERBATIM)
+    list(APPEND RCAT_MO_FILES ${mo_file})
+    install(FILES ${mo_file}
+            DESTINATION ${CMAKE_INSTALL_LOCALEDIR}/${lang}/LC_MESSAGES)
+endforeach()
+add_custom_target(rcat_translations ALL DEPENDS ${RCAT_MO_FILES})
 
 # ----------------------------------------------------------------------------
-# Optional inline image rendering (chafa + stb_image)
+# Inline image rendering (chafa + stb_image) and remote image fetch (libcurl).
 # ----------------------------------------------------------------------------
-set(RCAT_HAVE_CHAFA FALSE)
-set(RCAT_HAVE_CURL FALSE)
-if(RCAT_ENABLE_IMAGES)
-    pkg_check_modules(CHAFA IMPORTED_TARGET chafa)
-    find_path(STB_IMAGE_INCLUDE_DIR
-        NAMES stb_image.h
-        PATH_SUFFIXES stb)
-    if(CHAFA_FOUND AND STB_IMAGE_INCLUDE_DIR)
-        target_sources(rcat_core PRIVATE src/image.cpp)
-        # stb_image.h is third-party — silence its warnings by marking the
-        # include as SYSTEM, so -Werror builds aren't held hostage by it.
-        target_include_directories(rcat_core SYSTEM PRIVATE ${STB_IMAGE_INCLUDE_DIR})
-        target_link_libraries(rcat_core PUBLIC PkgConfig::CHAFA)
-        target_compile_definitions(rcat_core PUBLIC RCAT_HAVE_CHAFA=1)
-        set(RCAT_HAVE_CHAFA TRUE)
-        message(STATUS "rcat: image rendering enabled "
-                       "(chafa ${CHAFA_VERSION}, stb at ${STB_IMAGE_INCLUDE_DIR})")
+pkg_check_modules(CHAFA REQUIRED IMPORTED_TARGET chafa)
+find_path(STB_IMAGE_INCLUDE_DIR
+    NAMES stb_image.h
+    PATH_SUFFIXES stb
+    REQUIRED)
+pkg_check_modules(CURL REQUIRED IMPORTED_TARGET libcurl)
 
-        pkg_check_modules(CURL IMPORTED_TARGET libcurl)
-        if(CURL_FOUND)
-            target_link_libraries(rcat_core PUBLIC PkgConfig::CURL)
-            target_compile_definitions(rcat_core PUBLIC RCAT_HAVE_CURL=1)
-            set(RCAT_HAVE_CURL TRUE)
-            message(STATUS "rcat: remote image fetch enabled "
-                           "(libcurl ${CURL_VERSION})")
-        else()
-            message(STATUS "rcat: libcurl not found; --allow-web will be a no-op")
-        endif()
-    else()
-        if(NOT CHAFA_FOUND)
-            message(STATUS "rcat: chafa not found; image rendering disabled")
-        endif()
-        if(NOT STB_IMAGE_INCLUDE_DIR)
-            message(STATUS "rcat: stb_image.h not found; image rendering disabled")
-        endif()
-    endif()
-endif()
+target_sources(rcat_core PRIVATE src/image.cpp)
+# stb_image.h is third-party — silence its warnings by marking the
+# include as SYSTEM, so -Werror builds aren't held hostage by it.
+target_include_directories(rcat_core SYSTEM PRIVATE ${STB_IMAGE_INCLUDE_DIR})
+target_link_libraries(rcat_core PUBLIC PkgConfig::CHAFA PkgConfig::CURL)
+message(STATUS "rcat: image rendering enabled "
+               "(chafa ${CHAFA_VERSION}, stb at ${STB_IMAGE_INCLUDE_DIR})")
+message(STATUS "rcat: remote image fetch enabled "
+               "(libcurl ${CURL_VERSION})")
 
 # ----------------------------------------------------------------------------
 # Executable

@@ -5,11 +5,9 @@
 
 #include "highlight.hpp"
 #include "i18n.hpp"
+#include "image.hpp"
 #include "md4c.h"
 #include "wrap.hpp"
-#ifdef RCAT_HAVE_CHAFA
-#include "image.hpp"
-#endif
 
 #include <algorithm>
 #include <cstdio>
@@ -195,12 +193,11 @@ void drain_pending_images(RS& st) {
     int max_h = std::max(1, st.opts.image_max_height);
 
     for (auto& img : images) {
-#ifdef RCAT_HAVE_CHAFA
         bool rendered = false;
         if (!st.opts.no_images && !img.path.empty()) {
             ImageRenderResult res;
             if (img.remote) {
-                if (st.opts.allow_web && web_fetch_available()) {
+                if (st.opts.allow_web) {
                     auto fetched =
                         fetch_url(img.path, st.opts.web_timeout_seconds, st.opts.web_max_bytes);
                     if (fetched.success && !fetched.bytes.empty()) {
@@ -235,23 +232,6 @@ void drain_pending_images(RS& st) {
             line += "\n";
             st.out += line;
         }
-#else
-        Style s;
-        s.dim = true;
-        std::string line = prefix;
-        line += st.sgr_open(s);
-        line += "[";
-        line += _("image: ");
-        if (!img.alt.empty()) {
-            line += img.alt;
-            line += " — ";
-        }
-        line += img.path.empty() ? img.alt : img.path;
-        line += "]";
-        line += st.sgr_off();
-        line += "\n";
-        st.out += line;
-#endif
     }
     if (st.lists.empty() && st.quote_depth == 0)
         st.out += "\n";
@@ -851,16 +831,9 @@ int leave_span_cb(MD_SPANTYPE type, void* /*detail*/, void* userdata) {
         bool remote = looks_remote(src);
         bool can_render = !src.empty() && !st.opts.no_images;
         if (remote) {
-            // Only attempt remote rendering when explicitly allowed and
-            // libcurl is linked in.
+            // Only attempt remote rendering when explicitly allowed.
             can_render = can_render && st.opts.allow_web;
-#ifndef RCAT_HAVE_CURL
-            can_render = false;
-#endif
         }
-#ifndef RCAT_HAVE_CHAFA
-        can_render = false;
-#endif
         if (can_render) {
             RS::PendingImage pi;
             pi.path = remote ? src : resolve_local_path(src, st.opts.doc_dir);

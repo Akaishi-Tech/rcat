@@ -10,28 +10,12 @@
 
 #include <chafa.h>
 
-#ifdef RCAT_HAVE_CURL
 #include <curl/curl.h>
-#endif
 
 #include <cstring>
 #include <string>
 
 namespace rcat {
-
-bool image_rendering_available() {
-    return true;
-}
-
-#ifdef RCAT_HAVE_CURL
-bool web_fetch_available() {
-    return true;
-}
-#else
-bool web_fetch_available() {
-    return false;
-}
-#endif
 
 namespace {
 
@@ -126,8 +110,6 @@ ImageRenderResult render_image_bytes(const unsigned char* bytes, size_t bytes_le
     return r;
 }
 
-#ifdef RCAT_HAVE_CURL
-
 namespace {
 
 struct FetchCtx {
@@ -196,15 +178,5 @@ WebFetchResult fetch_url(std::string_view url, int timeout_seconds, size_t max_b
     curl_easy_cleanup(curl);
     return r;
 }
-
-#else  // !RCAT_HAVE_CURL
-
-WebFetchResult fetch_url(std::string_view, int, size_t) {
-    WebFetchResult r;
-    r.error = "rcat built without libcurl support";
-    return r;
-}
-
-#endif
 
 }  // namespace rcat

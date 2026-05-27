@@ -100,27 +100,25 @@ set_tests_properties(rless_highlight_python PROPERTIES
     PASS_REGULAR_EXPRESSION "38;5;"
 )
 
-if(RCAT_HAVE_CHAFA)
-    add_executable(test_image test_image.cpp)
-    target_link_libraries(test_image
-        PRIVATE rcat_core rcat_warnings rcat_sanitizers)
-    target_compile_definitions(test_image PRIVATE
-        RCAT_TEST_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
-    )
-    add_test(NAME image COMMAND test_image)
+add_executable(test_image test_image.cpp)
+target_link_libraries(test_image
+    PRIVATE rcat_core rcat_warnings rcat_sanitizers)
+target_compile_definitions(test_image PRIVATE
+    RCAT_TEST_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures"
+)
+add_test(NAME image COMMAND test_image)
 
-    # End-to-end: feeds sample.md through the CLI with color forced; the
-    # rendered local PNG must produce ANSI background-color sequences.
-    add_test(
-        NAME cli_image
-        COMMAND rcat --force-color --color=truecolor --columns 60
-                      --image-height 8
-                      ${CMAKE_CURRENT_SOURCE_DIR}/fixtures/sample.md
-    )
-    set_tests_properties(cli_image PROPERTIES
-        PASS_REGULAR_EXPRESSION "48;2;"
-    )
-endif()
+# End-to-end: feeds sample.md through the CLI with color forced; the
+# rendered local PNG must produce ANSI background-color sequences.
+add_test(
+    NAME cli_image
+    COMMAND rcat --force-color --color=truecolor --columns 60
+                  --image-height 8
+                  ${CMAKE_CURRENT_SOURCE_DIR}/fixtures/sample.md
+)
+set_tests_properties(cli_image PROPERTIES
+    PASS_REGULAR_EXPRESSION "48;2;"
+)
 
 # i18n: only meaningful for languages whose locale is generated on the
 # build host. We probe with `locale -a` and skip silently otherwise so

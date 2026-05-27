@@ -112,14 +112,12 @@ Disable colour but keep other styling (Unicode bullets, headings, etc.).
 Never emit OSC 8 hyperlinks, even when the terminal advertises support.
 .TP
 .B \-\-no\-images
-Skip inline images even when image rendering was compiled in.
+Skip inline images.
 .TP
 .B \-\-allow\-web
 Download and render
 .B http(s)
-image URLs. Off by default. Requires
-.B libcurl
-at build time.
+image URLs. Off by default.
 .TP
 .B \-\-web\-timeout " " \fISEC\fR
 Per-image fetch timeout for

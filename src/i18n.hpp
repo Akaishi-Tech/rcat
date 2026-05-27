@@ -10,12 +10,8 @@
 // at use site.
 #define N_(s) (s)
 
-#ifdef RCAT_HAVE_GETTEXT
 #include <libintl.h>
 #define _(s) gettext(s)
-#else
-#define _(s) (s)
-#endif
 
 namespace rcat {
 
