@@ -2,14 +2,14 @@
 
 ## Supported versions
 
-`rcat` is pre-1.0 and only the `main` branch receives security updates.
-Once the project tags a `1.x` release, the most recent minor version
-will be supported for security fixes.
+The latest released `1.x` minor version receives security fixes, along
+with the `main` branch.
 
 | Version | Supported |
 | --- | --- |
-| `main` | ✅ |
-| anything else | ❌ |
+| `main`         | ✅ |
+| `1.0.x`        | ✅ |
+| anything older | ❌ |
 
 ## Reporting a vulnerability
 
@@ -40,14 +40,15 @@ explicitly defend against:
 - Malformed UTF-8, oversized inputs, malformed Markdown, malformed code
   fences, malformed image bytes.
 - Adversarial filenames or info-strings.
-- Adversarial *remote* image URLs when `--allow-web` is passed (size
-  cap, timeout, content-type sniffing happens via stb\_image — no shell
-  execution).
+- Adversarial *remote* image URLs when `--allow-web` is passed (off by
+  default; size cap, fetch timeout, http/https only, content-type
+  sniffing happens via stb\_image — no shell execution).
 
 The threat model we do **not** defend against:
 
-- A malicious `MD4C`, `chafa`, `libcurl`, or `stb_image.h` build —
-  these are trusted dependencies.
+- A malicious `md4c`, `argparse`, `chafa`, `glib`, `libcurl`,
+  `stb_image.h`, or `libintl` build — these are trusted dependencies,
+  required at configure time.
 - Side-channel attacks on your terminal emulator (e.g. shell-execution
   bugs in the terminal triggered by exotic escape sequences). `rcat`
   emits a small, well-known subset of ANSI/OSC, but a buggy terminal is

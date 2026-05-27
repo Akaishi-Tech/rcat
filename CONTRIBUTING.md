@@ -19,18 +19,32 @@ cmake --build build -j
 ctest --test-dir build --output-on-failure
 ```
 
-Optional toggles:
+All external libraries are required at configure time. On Debian/Ubuntu:
+
+```sh
+sudo apt-get install --no-install-recommends \
+    cmake ninja-build pkg-config \
+    libmd4c-dev libargparse-dev \
+    libchafa-dev libglib2.0-dev libstb-dev libcurl4-openssl-dev \
+    gettext locales
+```
+
+Optional build toggles:
 
 | Flag | Effect |
 | --- | --- |
-| `-DRCAT_ENABLE_IMAGES=OFF` | drop the chafa/libcurl dependency at build time |
 | `-DRCAT_BUILD_TESTS=OFF`   | skip the test targets |
+| `-DRCAT_INSTALL_MAN=OFF`   | skip installing the man pages |
+| `-DRCAT_WARNINGS_AS_ERRORS=ON` | `-Werror` (what CI uses) |
 | `-DRCAT_ENABLE_ASAN=ON`    | AddressSanitizer + UBSan |
 | `-DRCAT_ENABLE_TSAN=ON`    | ThreadSanitizer (mutually exclusive with ASan) |
 | `-DRCAT_ENABLE_COVERAGE=ON`| gcov instrumentation |
 
-CI runs the same configure + build + ctest across Linux/macOS and
-gcc/clang. Please make sure your change passes locally before pushing.
+CI runs configure + build + ctest on `ubuntu-24.04` with both gcc and
+clang in Debug and Release, plus ASan, TSan, clang-format, and
+clang-tidy jobs. Please make sure your change passes locally before
+pushing — at minimum, the Release `-Werror` build and the full ctest
+suite.
 
 ## Style
 
