@@ -2,6 +2,7 @@
 // Copyright (C) 2026 Akaishi Tech
 
 #include "image.hpp"
+#include "rcat_version.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #define STBI_NO_HDR
@@ -156,7 +157,8 @@ WebFetchResult fetch_url(std::string_view url, int timeout_seconds, size_t max_b
     curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, (long)timeout_seconds);
     curl_easy_setopt(curl, CURLOPT_NOSIGNAL, 1L);
     curl_easy_setopt(curl, CURLOPT_FAILONERROR, 1L);  // 4xx/5xx -> error
-    curl_easy_setopt(curl, CURLOPT_USERAGENT, "rcat/0.1");
+    std::string ua = std::string("rcat/") + rcat::kVersion;
+    curl_easy_setopt(curl, CURLOPT_USERAGENT, ua.c_str());
     curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
     curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, curl_write_cb);
     curl_easy_setopt(curl, CURLOPT_WRITEDATA, &ctx);

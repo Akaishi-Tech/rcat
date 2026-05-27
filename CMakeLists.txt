@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.16)
 # when this is a git checkout (see below) — the literal here is the floor.
 # ----------------------------------------------------------------------------
 project(rcat
-    VERSION 0.1.0
+    VERSION 1.0.0
     DESCRIPTION "Render Markdown in the terminal"
     HOMEPAGE_URL "https://github.com/Akaishi-Tech/rcat"
     LANGUAGES C CXX)
