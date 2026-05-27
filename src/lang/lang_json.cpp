@@ -16,7 +16,7 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
     size_t i = 0, n = s.size();
     // Container stack: 'o' = object (next string is a key), 'a' = array.
     std::vector<char> stack;
-    stack.push_back('o');   // top-level: assume object until first '['
+    stack.push_back('o');  // top-level: assume object until first '['
     bool expect_key = true;
     bool after_colon = false;
 
@@ -32,7 +32,11 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
 
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -46,7 +50,8 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
                 i = j;
             } else {
                 size_t j = i + 2;
-                while (j + 1 < n && !(s[j] == '*' && s[j + 1] == '/')) ++j;
+                while (j + 1 < n && !(s[j] == '*' && s[j + 1] == '/'))
+                    ++j;
                 j = j + 1 < n ? j + 2 : n;
                 emit_split_newlines(emit, TokenKind::Comment, s.substr(i, j - i));
                 i = j;
@@ -72,7 +77,8 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
         if (c == '}' || c == ']') {
             emit(TokenKind::Punctuation, s.substr(i, 1));
             ++i;
-            if (!stack.empty()) stack.pop_back();
+            if (!stack.empty())
+                stack.pop_back();
             after_colon = false;
             recompute_expect_key();
             continue;
@@ -98,10 +104,10 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
             i = r.end;
             continue;
         }
-        if (c == '-' || c == '+' || is_digit(c)
-            || (c == '.' && i + 1 < n && is_digit(s[i + 1]))) {
+        if (c == '-' || c == '+' || is_digit(c) || (c == '.' && i + 1 < n && is_digit(s[i + 1]))) {
             size_t start = i;
-            if (c == '-' || c == '+') ++i;
+            if (c == '-' || c == '+')
+                ++i;
             if (i < n && (is_digit(s[i]) || s[i] == '.')) {
                 size_t j = scan_number(s, i);
                 emit(TokenKind::Number, s.substr(start, j - start));
@@ -114,9 +120,8 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
             size_t j = scan_ident(s, i);
             std::string_view word = s.substr(i, j - i);
             TokenKind kk;
-            if (word == "true" || word == "false" || word == "null"
-                || (json5 && (word == "Infinity" || word == "NaN"
-                              || word == "undefined"))) {
+            if (word == "true" || word == "false" || word == "null" ||
+                (json5 && (word == "Infinity" || word == "NaN" || word == "undefined"))) {
                 kk = TokenKind::Builtin;
             } else if (json5 && expect_key) {
                 kk = TokenKind::Attribute;
@@ -132,9 +137,13 @@ void scan(std::string_view s, const TokenSink& emit, bool json5) {
     }
 }
 
-} // namespace
+}  // namespace
 
-void tokenise_json (std::string_view s, const TokenSink& e) { scan(s, e, false); }
-void tokenise_json5(std::string_view s, const TokenSink& e) { scan(s, e, true);  }
+void tokenise_json(std::string_view s, const TokenSink& e) {
+    scan(s, e, false);
+}
+void tokenise_json5(std::string_view s, const TokenSink& e) {
+    scan(s, e, true);
+}
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

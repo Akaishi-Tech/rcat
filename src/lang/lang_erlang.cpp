@@ -13,41 +13,47 @@ namespace rcat::lang {
 namespace {
 
 const char* const KW_ERL[] = {
-    "after","and","andalso","band","begin","bnot","bor","bsl","bsr","bxor",
-    "case","catch","cond","div","end","fun","if","let","not","of","or","orelse",
-    "receive","rem","try","when","xor","-module","-export","-import","-define",
-    "-record","-include","-spec","-type",
-    nullptr};
+    "after",   "and",     "andalso", "band",    "begin",   "bnot",     "bor",   "bsl",   "bsr",
+    "bxor",    "case",    "catch",   "cond",    "div",     "end",      "fun",   "if",    "let",
+    "not",     "of",      "or",      "orelse",  "receive", "rem",      "try",   "when",  "xor",
+    "-module", "-export", "-import", "-define", "-record", "-include", "-spec", "-type", nullptr};
 const char* const BI_ERL[] = {
-    "true","false","ok","error","undefined","nil","is_atom","is_binary",
-    "is_boolean","is_float","is_function","is_integer","is_list","is_map",
-    "is_number","is_pid","is_port","is_reference","is_tuple","length","tuple_size",
-    "byte_size","atom_to_list","list_to_atom","integer_to_list","io","lists",
-    "maps","binary","string","spawn","self","node","monitor","link","exit",
-    nullptr};
+    "true",        "false",      "ok",           "error",        "undefined",
+    "nil",         "is_atom",    "is_binary",    "is_boolean",   "is_float",
+    "is_function", "is_integer", "is_list",      "is_map",       "is_number",
+    "is_pid",      "is_port",    "is_reference", "is_tuple",     "length",
+    "tuple_size",  "byte_size",  "atom_to_list", "list_to_atom", "integer_to_list",
+    "io",          "lists",      "maps",         "binary",       "string",
+    "spawn",       "self",       "node",         "monitor",      "link",
+    "exit",        nullptr};
 
 const char* const KW_EX[] = {
-    "after","and","case","catch","cond","def","defcallback","defdelegate",
-    "defexception","defguard","defguardp","defimpl","defmacro","defmacrop",
-    "defmodule","defp","defprotocol","defstruct","do","else","end","false",
-    "fn","for","if","import","in","nil","not","or","quote","raise","receive",
-    "require","rescue","return","throw","true","try","unless","unquote",
-    "unquote_splicing","use","when","with","yield",
-    nullptr};
+    "after",       "and",         "case",         "catch",    "cond",        "def",
+    "defcallback", "defdelegate", "defexception", "defguard", "defguardp",   "defimpl",
+    "defmacro",    "defmacrop",   "defmodule",    "defp",     "defprotocol", "defstruct",
+    "do",          "else",        "end",          "false",    "fn",          "for",
+    "if",          "import",      "in",           "nil",      "not",         "or",
+    "quote",       "raise",       "receive",      "require",  "rescue",      "return",
+    "throw",       "true",        "try",          "unless",   "unquote",     "unquote_splicing",
+    "use",         "when",        "with",         "yield",    nullptr};
 const char* const BI_EX[] = {
-    "true","false","nil","self","is_atom","is_binary","is_boolean","is_float",
-    "is_function","is_integer","is_list","is_map","is_number","is_pid","is_tuple",
-    "length","tuple_size","byte_size","to_string","to_charlist","IO","Enum",
-    "String","Map","List","Tuple","Atom","Process","Task","GenServer","Supervisor",
-    nullptr};
+    "true",     "false",       "nil",        "self",      "is_atom",   "is_binary",   "is_boolean",
+    "is_float", "is_function", "is_integer", "is_list",   "is_map",    "is_number",   "is_pid",
+    "is_tuple", "length",      "tuple_size", "byte_size", "to_string", "to_charlist", "IO",
+    "Enum",     "String",      "Map",        "List",      "Tuple",     "Atom",        "Process",
+    "Task",     "GenServer",   "Supervisor", nullptr};
 
-} // namespace
+}  // namespace
 
 void tokenise_erlang(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -75,13 +81,17 @@ void tokenise_erlang(std::string_view s, const TokenSink& emit) {
         }
         if (is_ident_start(c) || c == '-') {
             size_t start = i;
-            if (c == '-') ++i;
+            if (c == '-')
+                ++i;
             i = scan_ident(s, i);
             std::string_view w = s.substr(start, i - start);
             TokenKind kk = TokenKind::Text;
-            if (in_keyword_set(w, KW_ERL))      kk = TokenKind::Keyword;
-            else if (in_keyword_set(w, BI_ERL)) kk = TokenKind::Builtin;
-            else if (w.size() && (w[0] >= 'A' && w[0] <= 'Z')) kk = TokenKind::Variable;
+            if (in_keyword_set(w, KW_ERL))
+                kk = TokenKind::Keyword;
+            else if (in_keyword_set(w, BI_ERL))
+                kk = TokenKind::Builtin;
+            else if (w.size() && (w[0] >= 'A' && w[0] <= 'Z'))
+                kk = TokenKind::Variable;
             emit(kk, w);
             continue;
         }
@@ -99,7 +109,11 @@ void tokenise_elixir(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -126,7 +140,8 @@ void tokenise_elixir(std::string_view s, const TokenSink& emit) {
                 i = r.end;
             } else {
                 size_t j = scan_ident(s, i + 1);
-                while (j < n && (s[j] == '?' || s[j] == '!')) ++j;
+                while (j < n && (s[j] == '?' || s[j] == '!'))
+                    ++j;
                 emit(TokenKind::Constant, s.substr(i, j - i));
                 i = j;
             }
@@ -135,8 +150,8 @@ void tokenise_elixir(std::string_view s, const TokenSink& emit) {
         if (c == '"') {
             if (i + 2 < n && s[i + 1] == '"' && s[i + 2] == '"') {
                 size_t j = i + 3;
-                while (j + 2 < n
-                       && !(s[j] == '"' && s[j + 1] == '"' && s[j + 2] == '"')) ++j;
+                while (j + 2 < n && !(s[j] == '"' && s[j + 1] == '"' && s[j + 2] == '"'))
+                    ++j;
                 j = j + 2 < n ? j + 3 : n;
                 emit_split_newlines(emit, TokenKind::String, s.substr(i, j - i));
                 i = j;
@@ -155,16 +170,22 @@ void tokenise_elixir(std::string_view s, const TokenSink& emit) {
         }
         if (is_ident_start(c)) {
             size_t j = scan_ident(s, i);
-            while (j < n && (s[j] == '?' || s[j] == '!')) ++j;
+            while (j < n && (s[j] == '?' || s[j] == '!'))
+                ++j;
             std::string_view w = s.substr(i, j - i);
             TokenKind kk = TokenKind::Text;
-            if (in_keyword_set(w, KW_EX))      kk = TokenKind::Keyword;
-            else if (in_keyword_set(w, BI_EX)) kk = TokenKind::Builtin;
-            else if (w.size() && (w[0] >= 'A' && w[0] <= 'Z')) kk = TokenKind::Constant;
+            if (in_keyword_set(w, KW_EX))
+                kk = TokenKind::Keyword;
+            else if (in_keyword_set(w, BI_EX))
+                kk = TokenKind::Builtin;
+            else if (w.size() && (w[0] >= 'A' && w[0] <= 'Z'))
+                kk = TokenKind::Constant;
             else {
                 size_t k = j;
-                while (k < n && (s[k] == ' ' || s[k] == '\t')) ++k;
-                if (k < n && s[k] == '(') kk = TokenKind::Function;
+                while (k < n && (s[k] == ' ' || s[k] == '\t'))
+                    ++k;
+                if (k < n && s[k] == '(')
+                    kk = TokenKind::Function;
             }
             emit(kk, w);
             i = j;
@@ -180,4 +201,4 @@ void tokenise_elixir(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

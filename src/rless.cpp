@@ -35,21 +35,17 @@ namespace {
 
 [[nodiscard]] std::optional<std::string> read_file(const fs::path& path) {
     if (path == "-") {
-        std::string out{std::istreambuf_iterator<char>(std::cin),
-                        std::istreambuf_iterator<char>{}};
+        std::string out{std::istreambuf_iterator<char>(std::cin), std::istreambuf_iterator<char>{}};
         return out;
     }
     std::ifstream in(path, std::ios::binary);
     if (!in) {
-        std::fprintf(stderr, "rless: %s: %s\n",
-                     path.string().c_str(), std::strerror(errno));
+        std::fprintf(stderr, "rless: %s: %s\n", path.string().c_str(), std::strerror(errno));
         return std::nullopt;
     }
-    std::string out{std::istreambuf_iterator<char>(in),
-                    std::istreambuf_iterator<char>{}};
+    std::string out{std::istreambuf_iterator<char>(in), std::istreambuf_iterator<char>{}};
     if (in.bad()) {
-        std::fprintf(stderr, "rless: %s: %s\n",
-                     path.string().c_str(), std::strerror(errno));
+        std::fprintf(stderr, "rless: %s: %s\n", path.string().c_str(), std::strerror(errno));
         return std::nullopt;
     }
     return out;
@@ -61,12 +57,16 @@ struct ColorChoice {
 };
 
 [[nodiscard]] std::optional<ColorChoice> parse_color_mode(std::string_view s) {
-    if (s == "auto")      return ColorChoice{{}, true};
-    if (s == "none")      return ColorChoice{rcat::ColorMode::None, false};
-    if (s == "16")        return ColorChoice{rcat::ColorMode::Ansi16, false};
-    if (s == "256")       return ColorChoice{rcat::ColorMode::Ansi256, false};
+    if (s == "auto")
+        return ColorChoice{{}, true};
+    if (s == "none")
+        return ColorChoice{rcat::ColorMode::None, false};
+    if (s == "16")
+        return ColorChoice{rcat::ColorMode::Ansi16, false};
+    if (s == "256")
+        return ColorChoice{rcat::ColorMode::Ansi256, false};
     if (s == "truecolor" || s == "24bit")
-                          return ColorChoice{rcat::ColorMode::TrueColor, false};
+        return ColorChoice{rcat::ColorMode::TrueColor, false};
     return std::nullopt;
 }
 
@@ -77,25 +77,30 @@ struct ColorChoice {
     return out;
 }
 
-[[nodiscard]] bool looks_markdown(const fs::path& path,
-                                  std::string_view explicit_lang) {
-    if (explicit_lang == "md" || explicit_lang == "markdown") return true;
-    if (!explicit_lang.empty()) return false;
-    if (!path.has_extension()) return true;
+[[nodiscard]] bool looks_markdown(const fs::path& path, std::string_view explicit_lang) {
+    if (explicit_lang == "md" || explicit_lang == "markdown")
+        return true;
+    if (!explicit_lang.empty())
+        return false;
+    if (!path.has_extension())
+        return true;
 
     static constexpr std::array<std::string_view, 5> kMdExts{
         "md", "markdown", "mdown", "mkd", "mkdn",
     };
     std::string ext = to_lower(path.extension().string());
-    if (!ext.empty() && ext.front() == '.') ext.erase(0, 1);
-    if (std::find(kMdExts.begin(), kMdExts.end(), ext) != kMdExts.end()) return true;
+    if (!ext.empty() && ext.front() == '.')
+        ext.erase(0, 1);
+    if (std::find(kMdExts.begin(), kMdExts.end(), ext) != kMdExts.end())
+        return true;
 
     rcat::Language guess = rcat::detect_language({}, path.string(), {});
     return guess == rcat::Language::PlainText;
 }
 
 [[nodiscard]] fs::path doc_dir_of(const fs::path& path) {
-    if (path == "-") return fs::path{"."};
+    if (path == "-")
+        return fs::path{"."};
     fs::path parent = path.parent_path();
     return parent.empty() ? fs::path{"."} : parent;
 }
@@ -117,19 +122,17 @@ struct ColorChoice {
         caps.is_tty = true;
         ::close(tfd);
     }
-    if (caps.columns < 20) caps.columns = 20;
+    if (caps.columns < 20)
+        caps.columns = 20;
     return caps;
 }
 
 // One file → one rendered string. `cols` lets the pager re-call us at a
 // different width on terminal resize.
-std::string render_one(const std::string& src,
-                       const fs::path& path,
-                       std::string_view forced_lang,
-                       rcat::RenderOptions opts,
-                       int cols) {
+std::string render_one(const std::string& src, const fs::path& path, std::string_view forced_lang,
+                       rcat::RenderOptions opts, int cols) {
     opts.caps.columns = cols < 20 ? 20 : cols;
-    opts.doc_dir      = doc_dir_of(path).string();
+    opts.doc_dir = doc_dir_of(path).string();
 
     if (looks_markdown(path, forced_lang)) {
         std::string out;
@@ -142,13 +145,10 @@ std::string render_one(const std::string& src,
     }
 
     const auto nl = src.find('\n');
-    const std::string_view first_line{src.data(),
-        nl == std::string::npos ? src.size() : nl};
+    const std::string_view first_line{src.data(), nl == std::string::npos ? src.size() : nl};
     const std::string filename = (path == "-") ? std::string{} : path.string();
-    const rcat::Language lang =
-        rcat::detect_language(forced_lang, filename, first_line);
-    const rcat::ColorMode cm = opts.plain ? rcat::ColorMode::None
-                                          : opts.caps.color;
+    const rcat::Language lang = rcat::detect_language(forced_lang, filename, first_line);
+    const rcat::ColorMode cm = opts.plain ? rcat::ColorMode::None : opts.caps.color;
     std::string out;
     rcat::highlight_to_stream(src, lang, cm, /*prefix*/ "", out);
     return out;
@@ -158,21 +158,18 @@ void write_to_stdout(std::string_view buf) {
     std::fwrite(buf.data(), 1, buf.size(), stdout);
 }
 
-} // namespace
+}  // namespace
 
 int main(int argc, char** argv) {
     rcat::init_i18n();
 
-    argparse::ArgumentParser app("rless", rcat::kVersion,
-                                 argparse::default_arguments::help);
-    app.add_description(
-        _("Page through Markdown — and many other source/config files — "
-          "in the terminal."));
-    app.add_epilog(_(
-        "Reads from stdin if no FILE is given (or FILE is '-').\n"
-        "When stdout is not a terminal, rless behaves like rcat and writes\n"
-        "the rendered output without paging.\n"
-        "Inside the pager, press 'h' for keybindings or 'q' to quit."));
+    argparse::ArgumentParser app("rless", rcat::kVersion, argparse::default_arguments::help);
+    app.add_description(_("Page through Markdown — and many other source/config files — "
+                          "in the terminal."));
+    app.add_epilog(_("Reads from stdin if no FILE is given (or FILE is '-').\n"
+                     "When stdout is not a terminal, rless behaves like rcat and writes\n"
+                     "the rendered output without paging.\n"
+                     "Inside the pager, press 'h' for keybindings or 'q' to quit."));
 
     app.add_argument("-V", "--version")
         .help(_("show version and exit"))
@@ -253,8 +250,8 @@ int main(int argc, char** argv) {
     try {
         app.parse_args(argc, argv);
     } catch (const std::exception& e) {
-        std::fprintf(stderr, "rless: %s\n%s\n",
-                     e.what(), _("Try 'rless --help' for more information."));
+        std::fprintf(stderr, "rless: %s\n%s\n", e.what(),
+                     _("Try 'rless --help' for more information."));
         return 2;
     }
 
@@ -281,10 +278,10 @@ int main(int argc, char** argv) {
         opts.image_max_height = *n;
     }
 
-    opts.plain         = app.get<bool>("--plain");
+    opts.plain = app.get<bool>("--plain");
     opts.no_hyperlinks = app.get<bool>("--no-hyperlinks");
-    opts.no_images     = app.get<bool>("--no-images");
-    opts.allow_web     = app.get<bool>("--allow-web");
+    opts.no_images = app.get<bool>("--no-images");
+    opts.allow_web = app.get<bool>("--allow-web");
 
     if (auto n = app.present<int>("--web-timeout")) {
         if (*n < 1) {
@@ -294,11 +291,14 @@ int main(int argc, char** argv) {
         opts.web_timeout_seconds = *n;
     }
 
-    if (app.get<bool>("--ascii"))    opts.caps.unicode = false;
-    if (app.get<bool>("--no-color")) opts.caps.color   = rcat::ColorMode::None;
+    if (app.get<bool>("--ascii"))
+        opts.caps.unicode = false;
+    if (app.get<bool>("--no-color"))
+        opts.caps.color = rcat::ColorMode::None;
 
     if (auto choice = parse_color_mode(app.get<std::string>("--color"))) {
-        if (!choice->is_auto) opts.caps.color = choice->mode;
+        if (!choice->is_auto)
+            opts.caps.color = choice->mode;
     } else {
         std::fprintf(stderr, "rless: %s\n", _("invalid --color value"));
         return 2;
@@ -315,7 +315,8 @@ int main(int argc, char** argv) {
     try {
         files = app.get<std::vector<std::string>>("files");
     } catch (const std::logic_error&) {}
-    if (files.empty()) files.emplace_back("-");
+    if (files.empty())
+        files.emplace_back("-");
 
     const std::string forced_lang = app.get<std::string>("--lang");
     const bool no_pager = app.get<bool>("--no-pager") || !isatty(STDOUT_FILENO);
@@ -328,8 +329,12 @@ int main(int argc, char** argv) {
     for (const auto& f : files) {
         const fs::path path{f};
         auto src_opt = read_file(path);
-        if (!src_opt) { exit_code = 1; continue; }
-        if (!combined.empty()) combined += "\n";
+        if (!src_opt) {
+            exit_code = 1;
+            continue;
+        }
+        if (!combined.empty())
+            combined += "\n";
         combined += render_one(*src_opt, path, forced_lang, opts, opts.caps.columns);
         raw_inputs.emplace_back(path, std::move(*src_opt));
     }
@@ -343,9 +348,9 @@ int main(int argc, char** argv) {
     auto rerender = [&, forced_lang](int cols) {
         std::string out;
         for (std::size_t i = 0; i < raw_inputs.size(); ++i) {
-            if (i > 0) out += "\n";
-            out += render_one(raw_inputs[i].second, raw_inputs[i].first,
-                              forced_lang, opts, cols);
+            if (i > 0)
+                out += "\n";
+            out += render_one(raw_inputs[i].second, raw_inputs[i].first, forced_lang, opts, cols);
         }
         return out;
     };

@@ -9,12 +9,13 @@
 
 static int g_failed = 0;
 
-#define CHECK(expr) do {                                                    \
-    if (!(expr)) {                                                          \
-        std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr);\
-        ++g_failed;                                                         \
-    }                                                                       \
-} while (0)
+#define CHECK(expr)                                                              \
+    do {                                                                         \
+        if (!(expr)) {                                                           \
+            std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr); \
+            ++g_failed;                                                          \
+        }                                                                        \
+    } while (0)
 
 int main() {
     using rcat::clamp_top;
@@ -54,10 +55,8 @@ int main() {
     CHECK(strip_ansi("plain text") == "plain text");
     CHECK(strip_ansi("\x1b[31mred\x1b[0m") == "red");
     CHECK(strip_ansi("\x1b[1;38;5;42mfoo\x1b[0m bar") == "foo bar");
-    CHECK(strip_ansi("\x1b]8;;https://example.com\x1b\\link\x1b]8;;\x1b\\")
-          == "link");
-    CHECK(strip_ansi("\x1b]8;;https://example.com\x07link\x1b]8;;\x07")
-          == "link");
+    CHECK(strip_ansi("\x1b]8;;https://example.com\x1b\\link\x1b]8;;\x1b\\") == "link");
+    CHECK(strip_ansi("\x1b]8;;https://example.com\x07link\x1b]8;;\x07") == "link");
 
     // ---- find_next_match / find_prev_match ------------------------------
     {
@@ -100,14 +99,15 @@ int main() {
     }
 
     // ---- clamp_top ------------------------------------------------------
-    CHECK(clamp_top(0, 10, 0) == 0);          // empty
-    CHECK(clamp_top(5, 10, 3) == 0);          // viewport > total
-    CHECK(clamp_top(-3, 10, 100) == 0);       // negative top
-    CHECK(clamp_top(50, 10, 100) == 50);      // mid-buffer
-    CHECK(clamp_top(95, 10, 100) == 90);      // pinned to last page
-    CHECK(clamp_top(1000, 5, 12) == 7);       // past EOF clamps to total - viewport
-    CHECK(clamp_top(0, 0, 5) == 0);           // viewport zero (defensive)
+    CHECK(clamp_top(0, 10, 0) == 0);      // empty
+    CHECK(clamp_top(5, 10, 3) == 0);      // viewport > total
+    CHECK(clamp_top(-3, 10, 100) == 0);   // negative top
+    CHECK(clamp_top(50, 10, 100) == 50);  // mid-buffer
+    CHECK(clamp_top(95, 10, 100) == 90);  // pinned to last page
+    CHECK(clamp_top(1000, 5, 12) == 7);   // past EOF clamps to total - viewport
+    CHECK(clamp_top(0, 0, 5) == 0);       // viewport zero (defensive)
 
-    if (g_failed == 0) std::printf("test_pager: OK\n");
+    if (g_failed == 0)
+        std::printf("test_pager: OK\n");
     return g_failed == 0 ? 0 : 1;
 }

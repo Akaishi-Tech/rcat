@@ -12,31 +12,74 @@ namespace rcat::lang {
 
 namespace {
 
-const char* const KW[] = {
-    "BEGIN","END","alias","and","begin","break","case","class","def","defined?",
-    "do","else","elsif","end","ensure","false","for","if","in","module","next",
-    "nil","not","or","redo","rescue","retry","return","self","super","then",
-    "true","undef","unless","until","when","while","yield","require","require_relative",
-    "include","extend","attr_accessor","attr_reader","attr_writer","raise",
-    nullptr};
-const char* const TY[] = {
-    "Array","Hash","String","Symbol","Integer","Float","Numeric","TrueClass",
-    "FalseClass","NilClass","Object","Class","Module","Range","Proc","Lambda",
-    nullptr};
+const char* const KW[] = {"BEGIN",
+                          "END",
+                          "alias",
+                          "and",
+                          "begin",
+                          "break",
+                          "case",
+                          "class",
+                          "def",
+                          "defined?",
+                          "do",
+                          "else",
+                          "elsif",
+                          "end",
+                          "ensure",
+                          "false",
+                          "for",
+                          "if",
+                          "in",
+                          "module",
+                          "next",
+                          "nil",
+                          "not",
+                          "or",
+                          "redo",
+                          "rescue",
+                          "retry",
+                          "return",
+                          "self",
+                          "super",
+                          "then",
+                          "true",
+                          "undef",
+                          "unless",
+                          "until",
+                          "when",
+                          "while",
+                          "yield",
+                          "require",
+                          "require_relative",
+                          "include",
+                          "extend",
+                          "attr_accessor",
+                          "attr_reader",
+                          "attr_writer",
+                          "raise",
+                          nullptr};
+const char* const TY[] = {"Array",   "Hash",      "String",     "Symbol",   "Integer", "Float",
+                          "Numeric", "TrueClass", "FalseClass", "NilClass", "Object",  "Class",
+                          "Module",  "Range",     "Proc",       "Lambda",   nullptr};
 const char* const BI[] = {
-    "true","false","nil","self","puts","print","p","pp","gets","loop","lambda",
-    "proc","new","to_s","to_i","to_f","to_a","to_h","inspect","class","is_a?",
-    "kind_of?","instance_of?","respond_to?","send","__method__","__send__",
-    nullptr};
+    "true",     "false",        "nil",         "self",   "puts",       "print",    "p",
+    "pp",       "gets",         "loop",        "lambda", "proc",       "new",      "to_s",
+    "to_i",     "to_f",         "to_a",        "to_h",   "inspect",    "class",    "is_a?",
+    "kind_of?", "instance_of?", "respond_to?", "send",   "__method__", "__send__", nullptr};
 
-} // namespace
+}  // namespace
 
 void tokenise_ruby(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
 
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -50,13 +93,13 @@ void tokenise_ruby(std::string_view s, const TokenSink& emit) {
             continue;
         }
         // =begin/=end block comments at BOL
-        if (c == '=' && (i == 0 || s[i - 1] == '\n')
-            && starts_with(s, i, "=begin")) {
+        if (c == '=' && (i == 0 || s[i - 1] == '\n') && starts_with(s, i, "=begin")) {
             size_t j = i;
             while (j < n) {
                 if (s[j] == '\n' && j + 1 < n && starts_with(s, j + 1, "=end")) {
                     j = j + 1;
-                    while (j < n && s[j] != '\n') ++j;
+                    while (j < n && s[j] != '\n')
+                        ++j;
                     break;
                 }
                 ++j;
@@ -75,7 +118,8 @@ void tokenise_ruby(std::string_view s, const TokenSink& emit) {
         // @var, @@cvar, $gvar
         if (c == '@' || c == '$') {
             size_t j = i + 1;
-            if (c == '@' && j < n && s[j] == '@') ++j;
+            if (c == '@' && j < n && s[j] == '@')
+                ++j;
             if (j < n && is_ident_start(s[j])) {
                 j = scan_ident(s, j);
                 emit(TokenKind::Variable, s.substr(i, j - i));
@@ -98,18 +142,24 @@ void tokenise_ruby(std::string_view s, const TokenSink& emit) {
         if (is_ident_start(c)) {
             size_t j = scan_ident(s, i);
             // Ruby identifiers can end with ? or !
-            if (j < n && (s[j] == '?' || s[j] == '!')) ++j;
+            if (j < n && (s[j] == '?' || s[j] == '!'))
+                ++j;
             std::string_view word = s.substr(i, j - i);
             TokenKind kk = TokenKind::Text;
-            if (in_keyword_set(word, KW))      kk = TokenKind::Keyword;
-            else if (in_keyword_set(word, TY)) kk = TokenKind::BuiltinType;
-            else if (in_keyword_set(word, BI)) kk = TokenKind::Builtin;
+            if (in_keyword_set(word, KW))
+                kk = TokenKind::Keyword;
+            else if (in_keyword_set(word, TY))
+                kk = TokenKind::BuiltinType;
+            else if (in_keyword_set(word, BI))
+                kk = TokenKind::Builtin;
             else if (word.size() > 0 && word[0] >= 'A' && word[0] <= 'Z') {
                 kk = TokenKind::Constant;
             } else {
                 size_t k = j;
-                while (k < n && (s[k] == ' ' || s[k] == '\t')) ++k;
-                if (k < n && s[k] == '(') kk = TokenKind::Function;
+                while (k < n && (s[k] == ' ' || s[k] == '\t'))
+                    ++k;
+                if (k < n && s[k] == '(')
+                    kk = TokenKind::Function;
             }
             emit(kk, word);
             i = j;
@@ -125,4 +175,4 @@ void tokenise_ruby(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

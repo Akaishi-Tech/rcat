@@ -18,32 +18,43 @@ bool peek_word_then_colon(std::string_view s, size_t i, size_t& key_end) {
     size_t j = i;
     while (j < s.size()) {
         char c = s[j];
-        if (c == ':' || c == '\n' || c == '#') break;
+        if (c == ':' || c == '\n' || c == '#')
+            break;
         ++j;
     }
-    if (j >= s.size() || s[j] != ':') return false;
+    if (j >= s.size() || s[j] != ':')
+        return false;
     // Must be followed by space, newline, or EOF (YAML 1.2 rule)
-    if (j + 1 < s.size() && !is_space(s[j + 1]) && s[j + 1] != '\n') return false;
+    if (j + 1 < s.size() && !is_space(s[j + 1]) && s[j + 1] != '\n')
+        return false;
     // strip trailing whitespace from the key span
-    while (j > i && is_space(s[j - 1])) --j;
+    while (j > i && is_space(s[j - 1]))
+        --j;
     key_end = j;
     return j > i;
 }
 
-} // namespace
+}  // namespace
 
 void tokenise_yaml(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         // emit any leading indent as plain text
         size_t bol = i;
-        while (i < n && (s[i] == ' ' || s[i] == '\t')) ++i;
-        if (i > bol) emit(TokenKind::Text, s.substr(bol, i - bol));
+        while (i < n && (s[i] == ' ' || s[i] == '\t'))
+            ++i;
+        if (i > bol)
+            emit(TokenKind::Text, s.substr(bol, i - bol));
 
-        if (i >= n) break;
+        if (i >= n)
+            break;
         char c = s[i];
 
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (c == '#') {
             size_t j = scan_line(s, i);
             emit(TokenKind::Comment, s.substr(i, j - i));
@@ -74,8 +85,10 @@ void tokenise_yaml(std::string_view s, const TokenSink& emit) {
             ++i;
             // Whitespace after colon
             size_t j = i;
-            while (j < n && (s[j] == ' ' || s[j] == '\t')) ++j;
-            if (j > i) emit(TokenKind::Text, s.substr(i, j - i));
+            while (j < n && (s[j] == ' ' || s[j] == '\t'))
+                ++j;
+            if (j > i)
+                emit(TokenKind::Text, s.substr(i, j - i));
             i = j;
             // Value: emit rest of the line as value. Use simple heuristic:
             // quoted strings stay String; bare scalars become Text; numbers
@@ -88,20 +101,24 @@ void tokenise_yaml(std::string_view s, const TokenSink& emit) {
             }
             // Bare scalar to end of line
             size_t v = i;
-            while (i < n && s[i] != '\n' && s[i] != '#') ++i;
+            while (i < n && s[i] != '\n' && s[i] != '#')
+                ++i;
             std::string_view val = s.substr(v, i - v);
             // Trim trailing spaces from val for classification
             std::string_view t = val;
-            while (!t.empty() && is_space(t.back())) t.remove_suffix(1);
-            if (t == "true" || t == "false" || t == "null" || t == "~"
-                || t == "True" || t == "False" || t == "Null"
-                || t == "yes"  || t == "no"    || t == "on"   || t == "off") {
+            while (!t.empty() && is_space(t.back()))
+                t.remove_suffix(1);
+            if (t == "true" || t == "false" || t == "null" || t == "~" || t == "True" ||
+                t == "False" || t == "Null" || t == "yes" || t == "no" || t == "on" || t == "off") {
                 emit(TokenKind::Builtin, val);
             } else if (!t.empty() && (is_digit(t.front()) || t.front() == '-')) {
                 bool numeric = true;
                 for (char ch : t) {
-                    if (!(is_digit(ch) || ch == '.' || ch == '-' || ch == '+'
-                          || ch == 'e' || ch == 'E')) { numeric = false; break; }
+                    if (!(is_digit(ch) || ch == '.' || ch == '-' || ch == '+' || ch == 'e' ||
+                          ch == 'E')) {
+                        numeric = false;
+                        break;
+                    }
                 }
                 emit(numeric ? TokenKind::Number : TokenKind::Text, val);
             } else {
@@ -113,7 +130,8 @@ void tokenise_yaml(std::string_view s, const TokenSink& emit) {
         // anchors / aliases / tags
         if (c == '&' || c == '*' || c == '!') {
             size_t j = i + 1;
-            while (j < n && (is_ident_cont(s[j]) || s[j] == '!')) ++j;
+            while (j < n && (is_ident_cont(s[j]) || s[j] == '!'))
+                ++j;
             emit(TokenKind::Decorator, s.substr(i, j - i));
             i = j;
             continue;
@@ -121,10 +139,11 @@ void tokenise_yaml(std::string_view s, const TokenSink& emit) {
 
         // fallback: rest of line as text
         size_t j = i;
-        while (j < n && s[j] != '\n') ++j;
+        while (j < n && s[j] != '\n')
+            ++j;
         emit(TokenKind::Text, s.substr(i, j - i));
         i = j;
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

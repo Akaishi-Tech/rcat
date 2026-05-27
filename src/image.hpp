@@ -12,9 +12,9 @@ namespace rcat {
 
 struct ImageRenderResult {
     bool success = false;
-    int  width_cells  = 0;
-    int  height_cells = 0;
-    std::string output;       // multi-line, may contain ANSI; no trailing '\n'
+    int width_cells = 0;
+    int height_cells = 0;
+    std::string output;  // multi-line, may contain ANSI; no trailing '\n'
     std::string error;
 };
 
@@ -31,17 +31,13 @@ struct ImageRenderResult {
 // pixel mode (half-block / quadrant chars), which is the only protocol that
 // travels safely over SSH/tmux on every terminal. Returns success=false on
 // any failure (file missing, unsupported format, chafa init error).
-[[nodiscard]] ImageRenderResult render_image_file(std::string_view path,
-                                                  int max_width_cells,
-                                                  int max_height_cells,
-                                                  ColorMode color);
+[[nodiscard]] ImageRenderResult render_image_file(std::string_view path, int max_width_cells,
+                                                  int max_height_cells, ColorMode color);
 
 // Same as render_image_file but reads the image from an in-memory buffer
 // (e.g. an HTTP download). Caller owns `bytes` (must outlive the call).
-[[nodiscard]] ImageRenderResult render_image_bytes(const unsigned char* bytes,
-                                                   size_t bytes_len,
-                                                   int max_width_cells,
-                                                   int max_height_cells,
+[[nodiscard]] ImageRenderResult render_image_bytes(const unsigned char* bytes, size_t bytes_len,
+                                                   int max_width_cells, int max_height_cells,
                                                    ColorMode color);
 
 // Fetch a URL into memory using libcurl. Returns success=false if libcurl
@@ -53,8 +49,7 @@ struct WebFetchResult {
     std::string bytes;
     std::string error;
 };
-[[nodiscard]] WebFetchResult fetch_url(std::string_view url,
-                                       int timeout_seconds = 10,
-                                       size_t max_bytes    = 16 * 1024 * 1024);
+[[nodiscard]] WebFetchResult fetch_url(std::string_view url, int timeout_seconds = 10,
+                                       size_t max_bytes = 16 * 1024 * 1024);
 
-} // namespace rcat
+}  // namespace rcat

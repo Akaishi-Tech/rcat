@@ -21,31 +21,25 @@ namespace rcat {
 // input; the caller must keep `rendered` alive. The terminating newline
 // is excluded from each view, and any trailing empty line after a final '\n'
 // is dropped (matches the behaviour `less` shows for a file ending in '\n').
-[[nodiscard]] std::vector<std::string_view>
-split_visible_lines(std::string_view rendered);
+[[nodiscard]] std::vector<std::string_view> split_visible_lines(std::string_view rendered);
 
 // Return `s` with all ANSI CSI/OSC escape sequences removed.
 [[nodiscard]] std::string strip_ansi(std::string_view s);
 
 // First line index at-or-after `from` whose ANSI-stripped text contains
 // `needle`. `case_sensitive == false` does a simple ASCII case fold.
-[[nodiscard]] std::optional<std::size_t>
-find_next_match(const std::vector<std::string_view>& lines,
-                std::string_view needle,
-                std::size_t from,
-                bool case_sensitive);
+[[nodiscard]] std::optional<std::size_t> find_next_match(const std::vector<std::string_view>& lines,
+                                                         std::string_view needle, std::size_t from,
+                                                         bool case_sensitive);
 
 // First line index at-or-before `from` matching `needle`. Mirrors the above.
-[[nodiscard]] std::optional<std::size_t>
-find_prev_match(const std::vector<std::string_view>& lines,
-                std::string_view needle,
-                std::size_t from,
-                bool case_sensitive);
+[[nodiscard]] std::optional<std::size_t> find_prev_match(const std::vector<std::string_view>& lines,
+                                                         std::string_view needle, std::size_t from,
+                                                         bool case_sensitive);
 
 // Clamp `top` so that `[top, top + viewport)` stays inside `[0, total)`.
 // Returns 0 when `total == 0`. Always returns a value <= max(0, total-1).
-[[nodiscard]] std::size_t
-clamp_top(std::ptrdiff_t top, std::size_t viewport, std::size_t total);
+[[nodiscard]] std::size_t clamp_top(std::ptrdiff_t top, std::size_t viewport, std::size_t total);
 
 // ---------------------------------------------------------------------------
 // Interactive pager
@@ -73,4 +67,4 @@ struct PagerOptions {
 // non-paged dump).
 [[nodiscard]] int run_pager(std::string rendered, const PagerOptions& opts);
 
-} // namespace rcat
+}  // namespace rcat

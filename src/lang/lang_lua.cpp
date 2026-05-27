@@ -11,25 +11,28 @@ namespace rcat::lang {
 
 namespace {
 
-const char* const KW[] = {
-    "and","break","do","else","elseif","end","false","for","function","goto",
-    "if","in","local","nil","not","or","repeat","return","then","true","until",
-    "while",
-    nullptr};
+const char* const KW[] = {"and",      "break",  "do",   "else", "elseif", "end",   "false", "for",
+                          "function", "goto",   "if",   "in",   "local",  "nil",   "not",   "or",
+                          "repeat",   "return", "then", "true", "until",  "while", nullptr};
 const char* const BI[] = {
-    "print","require","pairs","ipairs","next","select","type","tostring",
-    "tonumber","setmetatable","getmetatable","rawequal","rawget","rawset",
-    "rawlen","collectgarbage","error","assert","pcall","xpcall","unpack",
-    "table","string","math","io","os","coroutine","package","_G","_ENV",
+    "print",  "require",  "pairs",     "ipairs",         "next",         "select",
+    "type",   "tostring", "tonumber",  "setmetatable",   "getmetatable", "rawequal",
+    "rawget", "rawset",   "rawlen",    "collectgarbage", "error",        "assert",
+    "pcall",  "xpcall",   "unpack",    "table",          "string",       "math",
+    "io",     "os",       "coroutine", "package",        "_G",           "_ENV",
     nullptr};
 
-} // namespace
+}  // namespace
 
 void tokenise_lua(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -40,7 +43,8 @@ void tokenise_lua(std::string_view s, const TokenSink& emit) {
             // Long comment --[[ ... ]] or line --
             if (i + 3 < n && s[i + 2] == '[' && s[i + 3] == '[') {
                 size_t j = i + 4;
-                while (j + 1 < n && !(s[j] == ']' && s[j + 1] == ']')) ++j;
+                while (j + 1 < n && !(s[j] == ']' && s[j + 1] == ']'))
+                    ++j;
                 j = j + 1 < n ? j + 2 : n;
                 emit_split_newlines(emit, TokenKind::Comment, s.substr(i, j - i));
                 i = j;
@@ -53,7 +57,8 @@ void tokenise_lua(std::string_view s, const TokenSink& emit) {
         }
         if (c == '[' && i + 1 < n && s[i + 1] == '[') {
             size_t j = i + 2;
-            while (j + 1 < n && !(s[j] == ']' && s[j + 1] == ']')) ++j;
+            while (j + 1 < n && !(s[j] == ']' && s[j + 1] == ']'))
+                ++j;
             j = j + 1 < n ? j + 2 : n;
             emit_split_newlines(emit, TokenKind::String, s.substr(i, j - i));
             i = j;
@@ -75,12 +80,16 @@ void tokenise_lua(std::string_view s, const TokenSink& emit) {
             size_t j = scan_ident(s, i);
             std::string_view w = s.substr(i, j - i);
             TokenKind kk = TokenKind::Text;
-            if (in_keyword_set(w, KW))      kk = TokenKind::Keyword;
-            else if (in_keyword_set(w, BI)) kk = TokenKind::Builtin;
+            if (in_keyword_set(w, KW))
+                kk = TokenKind::Keyword;
+            else if (in_keyword_set(w, BI))
+                kk = TokenKind::Builtin;
             else {
                 size_t k = j;
-                while (k < n && (s[k] == ' ' || s[k] == '\t')) ++k;
-                if (k < n && s[k] == '(') kk = TokenKind::Function;
+                while (k < n && (s[k] == ' ' || s[k] == '\t'))
+                    ++k;
+                if (k < n && s[k] == '(')
+                    kk = TokenKind::Function;
             }
             emit(kk, w);
             i = j;
@@ -96,4 +105,4 @@ void tokenise_lua(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

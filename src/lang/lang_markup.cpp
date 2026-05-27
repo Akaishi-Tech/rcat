@@ -14,11 +14,16 @@ void scan(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         // Comments <!-- ... -->
         if (starts_with(s, i, "<!--")) {
             size_t j = i + 4;
-            while (j + 2 < n && !(s[j] == '-' && s[j + 1] == '-' && s[j + 2] == '>')) ++j;
+            while (j + 2 < n && !(s[j] == '-' && s[j + 1] == '-' && s[j + 2] == '>'))
+                ++j;
             j = j + 2 < n ? j + 3 : n;
             emit_split_newlines(emit, TokenKind::Comment, s.substr(i, j - i));
             i = j;
@@ -27,7 +32,8 @@ void scan(std::string_view s, const TokenSink& emit) {
         // CDATA
         if (starts_with(s, i, "<![CDATA[")) {
             size_t j = i + 9;
-            while (j + 2 < n && !(s[j] == ']' && s[j + 1] == ']' && s[j + 2] == '>')) ++j;
+            while (j + 2 < n && !(s[j] == ']' && s[j + 1] == ']' && s[j + 2] == '>'))
+                ++j;
             j = j + 2 < n ? j + 3 : n;
             emit_split_newlines(emit, TokenKind::String, s.substr(i, j - i));
             i = j;
@@ -36,8 +42,10 @@ void scan(std::string_view s, const TokenSink& emit) {
         // Doctype / processing instruction <! ... > or <? ... ?>
         if (c == '<' && i + 1 < n && (s[i + 1] == '!' || s[i + 1] == '?')) {
             size_t j = i + 1;
-            while (j < n && s[j] != '>') ++j;
-            if (j < n) ++j;
+            while (j < n && s[j] != '>')
+                ++j;
+            if (j < n)
+                ++j;
             emit(TokenKind::Preprocessor, s.substr(i, j - i));
             i = j;
             continue;
@@ -54,7 +62,8 @@ void scan(std::string_view s, const TokenSink& emit) {
             }
             // tag name
             size_t name_start = i;
-            while (i < n && (is_ident_cont(s[i]) || s[i] == '-' || s[i] == ':')) ++i;
+            while (i < n && (is_ident_cont(s[i]) || s[i] == '-' || s[i] == ':'))
+                ++i;
             if (i > name_start) {
                 emit(TokenKind::Tag, s.substr(name_start, i - name_start));
             }
@@ -73,8 +82,8 @@ void scan(std::string_view s, const TokenSink& emit) {
                 }
                 // attribute name
                 size_t aname = i;
-                while (i < n && (is_ident_cont(s[i]) || s[i] == '-'
-                                || s[i] == ':')) ++i;
+                while (i < n && (is_ident_cont(s[i]) || s[i] == '-' || s[i] == ':'))
+                    ++i;
                 if (i > aname) {
                     emit(TokenKind::Attribute, s.substr(aname, i - aname));
                 }
@@ -83,19 +92,20 @@ void scan(std::string_view s, const TokenSink& emit) {
                     ++i;
                     if (i < n && (s[i] == '"' || s[i] == '\'')) {
                         auto r = scan_simple_string(s, i, s[i], true);
-                        emit_split_newlines(emit, TokenKind::String,
-                                            s.substr(i, r.end - i));
+                        emit_split_newlines(emit, TokenKind::String, s.substr(i, r.end - i));
                         i = r.end;
                     } else {
                         // unquoted value
                         size_t v = i;
-                        while (i < n && !is_space(s[i]) && s[i] != '>'
-                               && s[i] != '/' && s[i] != '\n') ++i;
-                        if (i > v) emit(TokenKind::String, s.substr(v, i - v));
+                        while (i < n && !is_space(s[i]) && s[i] != '>' && s[i] != '/' &&
+                               s[i] != '\n')
+                            ++i;
+                        if (i > v)
+                            emit(TokenKind::String, s.substr(v, i - v));
                     }
                 }
-                if (i < n && s[i] != '>' && !is_space(s[i]) && s[i] != '\n'
-                    && s[i] != '=' && s[i] != '/') {
+                if (i < n && s[i] != '>' && !is_space(s[i]) && s[i] != '\n' && s[i] != '=' &&
+                    s[i] != '/') {
                     // unknown char — emit and bump
                     emit(TokenKind::Operator, s.substr(i, 1));
                     ++i;
@@ -122,16 +132,23 @@ void scan(std::string_view s, const TokenSink& emit) {
         }
         // ordinary text up to next < or & or newline
         size_t j = i;
-        while (j < n && s[j] != '<' && s[j] != '&' && s[j] != '\n') ++j;
+        while (j < n && s[j] != '<' && s[j] != '&' && s[j] != '\n')
+            ++j;
         emit(TokenKind::Text, s.substr(i, j - i));
         i = j;
     }
 }
 
-} // namespace
+}  // namespace
 
-void tokenise_html(std::string_view s, const TokenSink& e) { scan(s, e); }
-void tokenise_xml (std::string_view s, const TokenSink& e) { scan(s, e); }
-void tokenise_svg (std::string_view s, const TokenSink& e) { scan(s, e); }
+void tokenise_html(std::string_view s, const TokenSink& e) {
+    scan(s, e);
+}
+void tokenise_xml(std::string_view s, const TokenSink& e) {
+    scan(s, e);
+}
+void tokenise_svg(std::string_view s, const TokenSink& e) {
+    scan(s, e);
+}
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

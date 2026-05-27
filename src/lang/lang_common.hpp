@@ -24,37 +24,42 @@ TokeniseFn get_tokeniser(Language lang);
 // Convenience: emit `text`, splitting at every '\n' so that no emitted token
 // straddles a newline. Used by simple tokenisers for runs that may contain
 // embedded newlines (block comments, multi-line strings).
-void emit_split_newlines(const TokenSink& emit, TokenKind kind,
-                         std::string_view text);
+void emit_split_newlines(const TokenSink& emit, TokenKind kind, std::string_view text);
 
 // ---------------------------------------------------------------------------
 // Character classification — ASCII only on purpose. Non-ASCII bytes inside
 // identifiers/strings just pass through as part of the surrounding run.
 
-inline bool is_digit(char c)        { return c >= '0' && c <= '9'; }
-inline bool is_hex(char c)          { return is_digit(c)
-                                          || (c >= 'a' && c <= 'f')
-                                          || (c >= 'A' && c <= 'F'); }
-inline bool is_alpha(char c)        { return (c >= 'a' && c <= 'z')
-                                          || (c >= 'A' && c <= 'Z'); }
-inline bool is_ident_start(char c)  { return is_alpha(c) || c == '_'
-                                          || (unsigned char)c >= 0x80; }
-inline bool is_ident_cont(char c)   { return is_ident_start(c) || is_digit(c); }
-inline bool is_space(char c)        { return c == ' '  || c == '\t'
-                                          || c == '\r' || c == '\f'
-                                          || c == '\v'; }
+inline bool is_digit(char c) {
+    return c >= '0' && c <= '9';
+}
+inline bool is_hex(char c) {
+    return is_digit(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
+}
+inline bool is_alpha(char c) {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z');
+}
+inline bool is_ident_start(char c) {
+    return is_alpha(c) || c == '_' || (unsigned char)c >= 0x80;
+}
+inline bool is_ident_cont(char c) {
+    return is_ident_start(c) || is_digit(c);
+}
+inline bool is_space(char c) {
+    return c == ' ' || c == '\t' || c == '\r' || c == '\f' || c == '\v';
+}
 
 // Match a contiguous run of `pred(c)` starting at `i`. Returns the end index.
 template <typename Pred>
 inline size_t scan_while(std::string_view s, size_t i, Pred pred) {
-    while (i < s.size() && pred(s[i])) ++i;
+    while (i < s.size() && pred(s[i]))
+        ++i;
     return i;
 }
 
 // Does `s` starting at `i` equal `lit`?
 inline bool starts_with(std::string_view s, size_t i, std::string_view lit) {
-    return s.size() - i >= lit.size()
-        && s.compare(i, lit.size(), lit) == 0;
+    return s.size() - i >= lit.size() && s.compare(i, lit.size(), lit) == 0;
 }
 
 // True if `word` (ASCII) is in the sorted, NUL-terminated keyword set `set`
@@ -82,10 +87,9 @@ size_t scan_ident(std::string_view s, size_t i);
 // Does NOT cross newlines (returns end-of-line if string is unterminated).
 // Set `allow_newline=true` for languages whose strings may span lines.
 struct StringScan {
-    size_t end;            // index past the closing quote (or EOL/EOF)
-    bool   terminated;     // saw closing quote
+    size_t end;       // index past the closing quote (or EOL/EOF)
+    bool terminated;  // saw closing quote
 };
-StringScan scan_simple_string(std::string_view s, size_t i,
-                              char quote, bool allow_newline);
+StringScan scan_simple_string(std::string_view s, size_t i, char quote, bool allow_newline);
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

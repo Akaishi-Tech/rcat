@@ -24,11 +24,7 @@ int utf8_decode(std::string_view s, size_t i, uint32_t& cp);
 // for width via display_width). A literal '\n' in `text` forces a break.
 // If `style_open` is non-empty, every continuation line re-applies it after
 // the prefix; this keeps a running style alive across wrapped lines.
-void emit_wrapped(std::string& out,
-                  std::string_view text,
-                  std::string_view first_prefix,
-                  std::string_view cont_prefix,
-                  int columns,
-                  std::string_view style_open = {});
+void emit_wrapped(std::string& out, std::string_view text, std::string_view first_prefix,
+                  std::string_view cont_prefix, int columns, std::string_view style_open = {});
 
-} // namespace rcat
+}  // namespace rcat

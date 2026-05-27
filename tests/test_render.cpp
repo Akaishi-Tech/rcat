@@ -10,12 +10,13 @@
 
 static int g_failed = 0;
 
-#define CHECK(expr) do {                                                \
-    if (!(expr)) {                                                      \
-        std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr); \
-        ++g_failed;                                                     \
-    }                                                                    \
-} while (0)
+#define CHECK(expr)                                                              \
+    do {                                                                         \
+        if (!(expr)) {                                                           \
+            std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr); \
+            ++g_failed;                                                          \
+        }                                                                        \
+    } while (0)
 
 static rcat::RenderOptions plain_opts() {
     rcat::RenderOptions o;
@@ -29,8 +30,8 @@ static rcat::RenderOptions plain_opts() {
 }
 
 int main() {
-    using rcat::render_markdown;
     using rcat::display_width;
+    using rcat::render_markdown;
 
     {
         // Heading + paragraph in plain mode
@@ -45,14 +46,13 @@ int main() {
         auto opts = plain_opts();
         opts.caps.columns = 20;
         std::string out;
-        CHECK(render_markdown(
-            "alpha beta gamma delta epsilon zeta eta theta iota\n",
-            opts, out));
+        CHECK(render_markdown("alpha beta gamma delta epsilon zeta eta theta iota\n", opts, out));
         // Every line should be <= 20 cells (plain mode, no SGR)
         size_t pos = 0;
         while (pos < out.size()) {
             size_t nl = out.find('\n', pos);
-            if (nl == std::string::npos) break;
+            if (nl == std::string::npos)
+                break;
             CHECK(display_width(std::string_view(out).substr(pos, nl - pos)) <= 20);
             pos = nl + 1;
         }
@@ -126,10 +126,9 @@ int main() {
 
     {
         // Table (GFM) — should produce ASCII box in plain mode
-        std::string md =
-            "| A | B |\n"
-            "|---|---|\n"
-            "| 1 | 2 |\n";
+        std::string md = "| A | B |\n"
+                         "|---|---|\n"
+                         "| 1 | 2 |\n";
         std::string out;
         CHECK(render_markdown(md, plain_opts(), out));
         CHECK(out.find("+") != std::string::npos);
@@ -137,6 +136,7 @@ int main() {
         CHECK(out.find("| 1") != std::string::npos);
     }
 
-    if (g_failed == 0) std::printf("test_render: OK\n");
+    if (g_failed == 0)
+        std::printf("test_render: OK\n");
     return g_failed == 0 ? 0 : 1;
 }

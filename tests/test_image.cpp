@@ -10,17 +10,18 @@
 #include <string_view>
 
 #ifndef RCAT_TEST_FIXTURE_DIR
-#  error "RCAT_TEST_FIXTURE_DIR must be defined"
+#error "RCAT_TEST_FIXTURE_DIR must be defined"
 #endif
 
 static int g_failed = 0;
 
-#define CHECK(expr) do {                                                \
-    if (!(expr)) {                                                      \
-        std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr); \
-        ++g_failed;                                                     \
-    }                                                                    \
-} while (0)
+#define CHECK(expr)                                                              \
+    do {                                                                         \
+        if (!(expr)) {                                                           \
+            std::fprintf(stderr, "FAIL %s:%d  %s\n", __FILE__, __LINE__, #expr); \
+            ++g_failed;                                                          \
+        }                                                                        \
+    } while (0)
 
 int main() {
     using namespace rcat;
@@ -35,8 +36,8 @@ int main() {
         CHECK(!r.output.empty());
         // Truecolor background sequences (48;2;r;g;b) must appear.
         CHECK(r.output.find("48;2;") != std::string::npos);
-        CHECK(r.width_cells  >  0);
-        CHECK(r.height_cells >  0);
+        CHECK(r.width_cells > 0);
+        CHECK(r.height_cells > 0);
         CHECK(r.height_cells <= 8);
     }
 
@@ -126,12 +127,12 @@ int main() {
         o.web_timeout_seconds = 2;
 
         std::string out;
-        CHECK(render_markdown(
-            "![r](https://nonexistent.invalid/x.png)\n", o, out));
+        CHECK(render_markdown("![r](https://nonexistent.invalid/x.png)\n", o, out));
         CHECK(out.find("[image: ") != std::string::npos);
         CHECK(out.find("48;2;") == std::string::npos);
     }
 
-    if (g_failed == 0) std::printf("test_image: OK\n");
+    if (g_failed == 0)
+        std::printf("test_image: OK\n");
     return g_failed == 0 ? 0 : 1;
 }

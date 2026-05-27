@@ -22,32 +22,41 @@ bool eq_icase(std::string_view a, const char* b) {
     while (i < a.size() && b[i]) {
         char x = (char)std::tolower((unsigned char)a[i]);
         char y = (char)std::tolower((unsigned char)b[i]);
-        if (x != y) return false;
+        if (x != y)
+            return false;
         ++i;
     }
     return i == a.size() && b[i] == 0;
 }
 
-} // namespace
+}  // namespace
 
 void tokenise_makefile(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (at_bol && c == '\t') {
             // Recipe line — emit the whole line as text, but highlight $vars.
             size_t j = i;
             while (j < n && s[j] != '\n') {
                 if (s[j] == '$' && j + 1 < n) {
-                    if (j > i) emit(TokenKind::Text, s.substr(i, j - i));
+                    if (j > i)
+                        emit(TokenKind::Text, s.substr(i, j - i));
                     size_t k = j + 1;
                     if (s[k] == '(' || s[k] == '{') {
                         char close = s[k] == '(' ? ')' : '}';
                         ++k;
-                        while (k < n && s[k] != close && s[k] != '\n') ++k;
-                        if (k < n) ++k;
+                        while (k < n && s[k] != close && s[k] != '\n')
+                            ++k;
+                        if (k < n)
+                            ++k;
                     } else {
                         ++k;
                     }
@@ -58,7 +67,8 @@ void tokenise_makefile(std::string_view s, const TokenSink& emit) {
                 }
                 ++j;
             }
-            if (j > i) emit(TokenKind::Text, s.substr(i, j - i));
+            if (j > i)
+                emit(TokenKind::Text, s.substr(i, j - i));
             i = j;
             at_bol = false;
             continue;
@@ -74,8 +84,10 @@ void tokenise_makefile(std::string_view s, const TokenSink& emit) {
             if (k < n && (s[k] == '(' || s[k] == '{')) {
                 char close = s[k] == '(' ? ')' : '}';
                 ++k;
-                while (k < n && s[k] != close && s[k] != '\n') ++k;
-                if (k < n) ++k;
+                while (k < n && s[k] != close && s[k] != '\n')
+                    ++k;
+                if (k < n)
+                    ++k;
             } else if (k < n) {
                 ++k;
             }
@@ -87,7 +99,8 @@ void tokenise_makefile(std::string_view s, const TokenSink& emit) {
         if (at_bol && (is_ident_start(c) || c == '.')) {
             // target line: NAME [NAME...] : prereqs
             size_t j = i;
-            while (j < n && s[j] != ':' && s[j] != '=' && s[j] != '\n' && s[j] != '#') ++j;
+            while (j < n && s[j] != ':' && s[j] != '=' && s[j] != '\n' && s[j] != '#')
+                ++j;
             if (j < n && s[j] == ':' && (j + 1 >= n || s[j + 1] != '=')) {
                 emit(TokenKind::Function, s.substr(i, j - i));
                 emit(TokenKind::Operator, s.substr(j, 1));
@@ -108,9 +121,8 @@ void tokenise_makefile(std::string_view s, const TokenSink& emit) {
             size_t j = scan_ident(s, i);
             std::string_view w = s.substr(i, j - i);
             TokenKind kk = TokenKind::Text;
-            if (w == "include" || w == "ifeq" || w == "ifneq" || w == "ifdef"
-                || w == "ifndef" || w == "else" || w == "endif"
-                || w == "define" || w == "endef" || w == "export") {
+            if (w == "include" || w == "ifeq" || w == "ifneq" || w == "ifdef" || w == "ifndef" ||
+                w == "else" || w == "endif" || w == "define" || w == "endef" || w == "export") {
                 kk = TokenKind::Keyword;
             }
             emit(kk, w);
@@ -132,15 +144,19 @@ void tokenise_makefile(std::string_view s, const TokenSink& emit) {
 
 void tokenise_dockerfile(std::string_view s, const TokenSink& emit) {
     static const char* const cmds[] = {
-        "FROM","RUN","CMD","LABEL","MAINTAINER","EXPOSE","ENV","ADD","COPY",
-        "ENTRYPOINT","VOLUME","USER","WORKDIR","ARG","ONBUILD","STOPSIGNAL",
-        "HEALTHCHECK","SHELL",
-        nullptr};
+        "FROM",    "RUN",        "CMD",         "LABEL",  "MAINTAINER", "EXPOSE",  "ENV",
+        "ADD",     "COPY",       "ENTRYPOINT",  "VOLUME", "USER",       "WORKDIR", "ARG",
+        "ONBUILD", "STOPSIGNAL", "HEALTHCHECK", "SHELL",  nullptr};
     size_t i = 0, n = s.size();
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (c == '#' && at_bol) {
             size_t j = scan_line(s, i);
             emit(TokenKind::Comment, s.substr(i, j - i));
@@ -152,7 +168,10 @@ void tokenise_dockerfile(std::string_view s, const TokenSink& emit) {
             std::string_view w = s.substr(i, j - i);
             bool match = false;
             for (auto p = cmds; *p; ++p) {
-                if (eq_icase(w, *p)) { match = true; break; }
+                if (eq_icase(w, *p)) {
+                    match = true;
+                    break;
+                }
             }
             emit(match ? TokenKind::Keyword : TokenKind::Text, w);
             i = j;
@@ -163,8 +182,10 @@ void tokenise_dockerfile(std::string_view s, const TokenSink& emit) {
             size_t k = i + 1;
             if (k < n && s[k] == '{') {
                 ++k;
-                while (k < n && s[k] != '}' && s[k] != '\n') ++k;
-                if (k < n) ++k;
+                while (k < n && s[k] != '}' && s[k] != '\n')
+                    ++k;
+                if (k < n)
+                    ++k;
             } else {
                 k = scan_while(s, k, is_ident_cont);
             }
@@ -193,22 +214,62 @@ void tokenise_dockerfile(std::string_view s, const TokenSink& emit) {
 }
 
 void tokenise_cmake(std::string_view s, const TokenSink& emit) {
-    static const char* const cmds[] = {
-        "add_executable","add_library","add_subdirectory","add_definitions",
-        "add_compile_options","add_custom_command","add_custom_target","add_test",
-        "include","include_directories","cmake_minimum_required","project",
-        "find_package","find_path","find_library","target_link_libraries",
-        "target_include_directories","target_compile_options","target_sources",
-        "target_compile_definitions","set","unset","option","message","if",
-        "elseif","else","endif","foreach","endforeach","while","endwhile",
-        "function","endfunction","macro","endmacro","return","install",
-        "configure_file","pkg_check_modules","execute_process","file","string",
-        "list","get_filename_component","enable_testing","set_tests_properties",
-        nullptr};
+    static const char* const cmds[] = {"add_executable",
+                                       "add_library",
+                                       "add_subdirectory",
+                                       "add_definitions",
+                                       "add_compile_options",
+                                       "add_custom_command",
+                                       "add_custom_target",
+                                       "add_test",
+                                       "include",
+                                       "include_directories",
+                                       "cmake_minimum_required",
+                                       "project",
+                                       "find_package",
+                                       "find_path",
+                                       "find_library",
+                                       "target_link_libraries",
+                                       "target_include_directories",
+                                       "target_compile_options",
+                                       "target_sources",
+                                       "target_compile_definitions",
+                                       "set",
+                                       "unset",
+                                       "option",
+                                       "message",
+                                       "if",
+                                       "elseif",
+                                       "else",
+                                       "endif",
+                                       "foreach",
+                                       "endforeach",
+                                       "while",
+                                       "endwhile",
+                                       "function",
+                                       "endfunction",
+                                       "macro",
+                                       "endmacro",
+                                       "return",
+                                       "install",
+                                       "configure_file",
+                                       "pkg_check_modules",
+                                       "execute_process",
+                                       "file",
+                                       "string",
+                                       "list",
+                                       "get_filename_component",
+                                       "enable_testing",
+                                       "set_tests_properties",
+                                       nullptr};
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -229,8 +290,10 @@ void tokenise_cmake(std::string_view s, const TokenSink& emit) {
         }
         if (c == '$' && i + 1 < n && s[i + 1] == '{') {
             size_t j = i + 2;
-            while (j < n && s[j] != '}' && s[j] != '\n') ++j;
-            if (j < n) ++j;
+            while (j < n && s[j] != '}' && s[j] != '\n')
+                ++j;
+            if (j < n)
+                ++j;
             emit(TokenKind::Variable, s.substr(i, j - i));
             i = j;
             continue;
@@ -243,20 +306,26 @@ void tokenise_cmake(std::string_view s, const TokenSink& emit) {
         }
         if (is_ident_start(c)) {
             size_t j = i;
-            while (j < n && (is_ident_cont(s[j]) || s[j] == '-')) ++j;
+            while (j < n && (is_ident_cont(s[j]) || s[j] == '-'))
+                ++j;
             std::string_view w = s.substr(i, j - i);
             bool kw = false;
             for (auto p = cmds; *p; ++p) {
-                if (eq_icase(w, *p)) { kw = true; break; }
+                if (eq_icase(w, *p)) {
+                    kw = true;
+                    break;
+                }
             }
             TokenKind kk;
-            if (kw) kk = TokenKind::Function;
+            if (kw)
+                kk = TokenKind::Function;
             else {
                 // Heuristic for upper-case constants (CMAKE_FOO)
                 bool upper = true;
                 for (char ch : w) {
                     if (!((ch >= 'A' && ch <= 'Z') || ch == '_' || is_digit(ch))) {
-                        upper = false; break;
+                        upper = false;
+                        break;
                     }
                 }
                 kk = (upper && w.size() > 1) ? TokenKind::Constant : TokenKind::Text;
@@ -276,19 +345,47 @@ void tokenise_cmake(std::string_view s, const TokenSink& emit) {
 }
 
 void tokenise_nginx(std::string_view s, const TokenSink& emit) {
-    static const char* const dirs[] = {
-        "server","listen","location","root","index","server_name","include",
-        "upstream","proxy_pass","proxy_set_header","return","rewrite","if",
-        "set","map","ssl_certificate","ssl_certificate_key","access_log",
-        "error_log","worker_processes","events","http","types","default_type",
-        "client_max_body_size","add_header","gzip","try_files","fastcgi_pass",
-        "fastcgi_param",
-        nullptr};
+    static const char* const dirs[] = {"server",
+                                       "listen",
+                                       "location",
+                                       "root",
+                                       "index",
+                                       "server_name",
+                                       "include",
+                                       "upstream",
+                                       "proxy_pass",
+                                       "proxy_set_header",
+                                       "return",
+                                       "rewrite",
+                                       "if",
+                                       "set",
+                                       "map",
+                                       "ssl_certificate",
+                                       "ssl_certificate_key",
+                                       "access_log",
+                                       "error_log",
+                                       "worker_processes",
+                                       "events",
+                                       "http",
+                                       "types",
+                                       "default_type",
+                                       "client_max_body_size",
+                                       "add_header",
+                                       "gzip",
+                                       "try_files",
+                                       "fastcgi_pass",
+                                       "fastcgi_param",
+                                       nullptr};
     size_t i = 0, n = s.size();
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -305,8 +402,10 @@ void tokenise_nginx(std::string_view s, const TokenSink& emit) {
             size_t j = i + 1;
             if (s[j] == '{') {
                 ++j;
-                while (j < n && s[j] != '}' && s[j] != '\n') ++j;
-                if (j < n) ++j;
+                while (j < n && s[j] != '}' && s[j] != '\n')
+                    ++j;
+                if (j < n)
+                    ++j;
             } else {
                 j = scan_while(s, j, is_ident_cont);
             }
@@ -326,7 +425,10 @@ void tokenise_nginx(std::string_view s, const TokenSink& emit) {
             std::string_view w = s.substr(i, j - i);
             bool match = false;
             for (auto p = dirs; *p; ++p) {
-                if (w == *p) { match = true; break; }
+                if (w == *p) {
+                    match = true;
+                    break;
+                }
             }
             emit(match ? TokenKind::Keyword : TokenKind::Text, w);
             i = j;
@@ -336,7 +438,8 @@ void tokenise_nginx(std::string_view s, const TokenSink& emit) {
         if (std::strchr("{};", c)) {
             emit(TokenKind::Punctuation, s.substr(i, 1));
             ++i;
-            if (c == ';' || c == '{' || c == '}') at_bol = true;
+            if (c == ';' || c == '{' || c == '}')
+                at_bol = true;
             continue;
         }
         emit(TokenKind::Text, s.substr(i, 1));
@@ -350,7 +453,12 @@ void tokenise_apache(std::string_view s, const TokenSink& emit) {
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -366,8 +474,10 @@ void tokenise_apache(std::string_view s, const TokenSink& emit) {
         if (c == '<') {
             // <Directory ...> or </Directory>
             size_t j = i;
-            while (j < n && s[j] != '>' && s[j] != '\n') ++j;
-            if (j < n) ++j;
+            while (j < n && s[j] != '>' && s[j] != '\n')
+                ++j;
+            if (j < n)
+                ++j;
             emit(TokenKind::Tag, s.substr(i, j - i));
             i = j;
             at_bol = false;
@@ -393,4 +503,4 @@ void tokenise_apache(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

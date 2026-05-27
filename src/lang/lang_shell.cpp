@@ -14,27 +14,30 @@ namespace rcat::lang {
 namespace {
 
 const char* const KW[] = {
-    "if","then","elif","else","fi","case","esac","for","select","while","until",
-    "do","done","in","function","time","coproc","break","continue","return",
-    "exit","exec","trap","wait","local","declare","typeset","readonly","export",
-    "unset","shift","source","let",
-    nullptr};
+    "if",       "then",   "elif",  "else",  "fi",     "case",     "esac",  "for",     "select",
+    "while",    "until",  "do",    "done",  "in",     "function", "time",  "coproc",  "break",
+    "continue", "return", "exit",  "exec",  "trap",   "wait",     "local", "declare", "typeset",
+    "readonly", "export", "unset", "shift", "source", "let",      nullptr};
 const char* const BI[] = {
-    "echo","printf","read","cd","pwd","pushd","popd","dirs","alias","unalias",
-    "bind","builtin","caller","command","compgen","complete","disown","enable",
-    "eval","fc","fg","bg","getopts","hash","help","history","jobs","kill",
-    "logout","mapfile","pwd","set","shopt","suspend","test","times","trap",
-    "type","ulimit","umask","wait","true","false","[",
-    nullptr};
+    "echo",    "printf", "read",    "cd",     "pwd",     "pushd",   "popd",     "dirs",    "alias",
+    "unalias", "bind",   "builtin", "caller", "command", "compgen", "complete", "disown",  "enable",
+    "eval",    "fc",     "fg",      "bg",     "getopts", "hash",    "help",     "history", "jobs",
+    "kill",    "logout", "mapfile", "pwd",    "set",     "shopt",   "suspend",  "test",    "times",
+    "trap",    "type",   "ulimit",  "umask",  "wait",    "true",    "false",    "[",       nullptr};
 
-} // namespace
+}  // namespace
 
 void tokenise_shell(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -53,8 +56,10 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
                 char p = s[i + 1];
                 if (p == '{') {
                     size_t j = i + 2;
-                    while (j < n && s[j] != '}') ++j;
-                    if (j < n) ++j;
+                    while (j < n && s[j] != '}')
+                        ++j;
+                    if (j < n)
+                        ++j;
                     emit(TokenKind::Variable, s.substr(i, j - i));
                     i = j;
                     at_bol = false;
@@ -65,9 +70,14 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
                     size_t j = i + 3;
                     int depth = 1;
                     while (j + 1 < n && depth > 0) {
-                        if (s[j] == '(' && s[j + 1] == '(') { depth++; j += 2; }
-                        else if (s[j] == ')' && s[j + 1] == ')') { depth--; j += 2; }
-                        else ++j;
+                        if (s[j] == '(' && s[j + 1] == '(') {
+                            depth++;
+                            j += 2;
+                        } else if (s[j] == ')' && s[j + 1] == ')') {
+                            depth--;
+                            j += 2;
+                        } else
+                            ++j;
                     }
                     emit(TokenKind::Variable, s.substr(i, j - i));
                     i = j;
@@ -78,8 +88,10 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
                     size_t j = i + 2;
                     int depth = 1;
                     while (j < n && depth > 0) {
-                        if (s[j] == '(') depth++;
-                        else if (s[j] == ')') depth--;
+                        if (s[j] == '(')
+                            depth++;
+                        else if (s[j] == ')')
+                            depth--;
                         ++j;
                     }
                     emit(TokenKind::Variable, s.substr(i, j - i));
@@ -87,9 +99,8 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
                     at_bol = false;
                     continue;
                 }
-                if (is_ident_start(p) || is_digit(p) || p == '?' || p == '@'
-                    || p == '#' || p == '*' || p == '$' || p == '!'
-                    || p == '-') {
+                if (is_ident_start(p) || is_digit(p) || p == '?' || p == '@' || p == '#' ||
+                    p == '*' || p == '$' || p == '!' || p == '-') {
                     size_t j = i + 2;
                     if (is_ident_start(p) || is_digit(p)) {
                         j = scan_while(s, j, is_ident_cont);
@@ -117,10 +128,14 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
             size_t run_start = i;
             (void)run_start;
             while (j < n && s[j] != '"') {
-                if (s[j] == '\\' && j + 1 < n) { j += 2; continue; }
+                if (s[j] == '\\' && j + 1 < n) {
+                    j += 2;
+                    continue;
+                }
                 ++j;
             }
-            if (j < n) ++j;
+            if (j < n)
+                ++j;
             emit_split_newlines(emit, TokenKind::String, s.substr(i, j - i));
             i = j;
             at_bol = false;
@@ -129,10 +144,14 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
         if (c == '`') {
             size_t j = i + 1;
             while (j < n && s[j] != '`') {
-                if (s[j] == '\\' && j + 1 < n) { j += 2; continue; }
+                if (s[j] == '\\' && j + 1 < n) {
+                    j += 2;
+                    continue;
+                }
                 ++j;
             }
-            if (j < n) ++j;
+            if (j < n)
+                ++j;
             emit_split_newlines(emit, TokenKind::String, s.substr(i, j - i));
             i = j;
             at_bol = false;
@@ -150,8 +169,10 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
             if (c == '-') {
                 // option-like flag: --foo / -x
                 ++j;
-                if (j < n && s[j] == '-') ++j;
-                while (j < n && (is_ident_cont(s[j]) || s[j] == '-')) ++j;
+                if (j < n && s[j] == '-')
+                    ++j;
+                while (j < n && (is_ident_cont(s[j]) || s[j] == '-'))
+                    ++j;
                 if (j > i + 1) {
                     emit(TokenKind::Attribute, s.substr(i, j - i));
                     i = j;
@@ -163,9 +184,12 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
                 j = scan_ident(s, i);
                 std::string_view word = s.substr(i, j - i);
                 TokenKind kk = TokenKind::Text;
-                if (in_keyword_set(word, KW))      kk = TokenKind::Keyword;
-                else if (in_keyword_set(word, BI)) kk = TokenKind::Builtin;
-                else if (at_bol)                    kk = TokenKind::Function;
+                if (in_keyword_set(word, KW))
+                    kk = TokenKind::Keyword;
+                else if (in_keyword_set(word, BI))
+                    kk = TokenKind::Builtin;
+                else if (at_bol)
+                    kk = TokenKind::Function;
                 emit(kk, word);
                 i = j;
                 at_bol = false;
@@ -190,4 +214,4 @@ void tokenise_shell(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang

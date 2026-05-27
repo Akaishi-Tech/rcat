@@ -12,44 +12,77 @@ namespace rcat::lang {
 namespace {
 
 const char* const KW_PS[] = {
-    "begin","break","catch","class","continue","data","define","do","dynamicparam",
-    "else","elseif","end","enum","exit","filter","finally","for","foreach",
-    "from","function","hidden","if","in","inlinescript","param","process",
-    "return","static","switch","throw","trap","try","until","using","var",
-    "while","workflow",
-    nullptr};
-const char* const BI_PS[] = {
-    "Get-ChildItem","Get-Content","Set-Content","Add-Content","Get-Item",
-    "Set-Item","Remove-Item","Copy-Item","Move-Item","New-Item","Get-Process",
-    "Stop-Process","Start-Process","Write-Output","Write-Host","Write-Error",
-    "Write-Warning","Write-Verbose","Read-Host","Out-File","Out-Null",
-    "ConvertTo-Json","ConvertFrom-Json","Select-Object","Where-Object",
-    "ForEach-Object","Sort-Object","Group-Object","Measure-Object","Invoke-Expression",
-    "Invoke-RestMethod","Invoke-WebRequest","Test-Path","Join-Path","Split-Path",
-    "Resolve-Path","$true","$false","$null",
-    nullptr};
+    "begin",        "break",   "catch",  "class",    "continue", "data",  "define", "do",
+    "dynamicparam", "else",    "elseif", "end",      "enum",     "exit",  "filter", "finally",
+    "for",          "foreach", "from",   "function", "hidden",   "if",    "in",     "inlinescript",
+    "param",        "process", "return", "static",   "switch",   "throw", "trap",   "try",
+    "until",        "using",   "var",    "while",    "workflow", nullptr};
+const char* const BI_PS[] = {"Get-ChildItem",
+                             "Get-Content",
+                             "Set-Content",
+                             "Add-Content",
+                             "Get-Item",
+                             "Set-Item",
+                             "Remove-Item",
+                             "Copy-Item",
+                             "Move-Item",
+                             "New-Item",
+                             "Get-Process",
+                             "Stop-Process",
+                             "Start-Process",
+                             "Write-Output",
+                             "Write-Host",
+                             "Write-Error",
+                             "Write-Warning",
+                             "Write-Verbose",
+                             "Read-Host",
+                             "Out-File",
+                             "Out-Null",
+                             "ConvertTo-Json",
+                             "ConvertFrom-Json",
+                             "Select-Object",
+                             "Where-Object",
+                             "ForEach-Object",
+                             "Sort-Object",
+                             "Group-Object",
+                             "Measure-Object",
+                             "Invoke-Expression",
+                             "Invoke-RestMethod",
+                             "Invoke-WebRequest",
+                             "Test-Path",
+                             "Join-Path",
+                             "Split-Path",
+                             "Resolve-Path",
+                             "$true",
+                             "$false",
+                             "$null",
+                             nullptr};
 
 const char* const KW_TCL[] = {
-    "after","append","array","binary","break","case","catch","cd","close",
-    "concat","continue","dict","else","elseif","encoding","eof","error","eval",
-    "exec","exit","expr","fblocked","fconfigure","fcopy","file","fileevent",
-    "flush","for","foreach","format","gets","glob","global","history","if",
-    "incr","info","interp","join","lappend","lassign","lindex","linsert",
-    "list","llength","lmap","load","lrange","lrepeat","lreplace","lreverse",
-    "lsearch","lset","lsort","namespace","open","package","parray","pid",
-    "proc","puts","pwd","read","regexp","regsub","rename","return","scan",
-    "seek","set","socket","source","split","string","subst","switch","tell",
-    "throw","time","trace","try","unknown","unset","update","uplevel","upvar",
-    "variable","vwait","while",
-    nullptr};
+    "after",   "append",    "array",    "binary",  "break",   "case",     "catch",      "cd",
+    "close",   "concat",    "continue", "dict",    "else",    "elseif",   "encoding",   "eof",
+    "error",   "eval",      "exec",     "exit",    "expr",    "fblocked", "fconfigure", "fcopy",
+    "file",    "fileevent", "flush",    "for",     "foreach", "format",   "gets",       "glob",
+    "global",  "history",   "if",       "incr",    "info",    "interp",   "join",       "lappend",
+    "lassign", "lindex",    "linsert",  "list",    "llength", "lmap",     "load",       "lrange",
+    "lrepeat", "lreplace",  "lreverse", "lsearch", "lset",    "lsort",    "namespace",  "open",
+    "package", "parray",    "pid",      "proc",    "puts",    "pwd",      "read",       "regexp",
+    "regsub",  "rename",    "return",   "scan",    "seek",    "set",      "socket",     "source",
+    "split",   "string",    "subst",    "switch",  "tell",    "throw",    "time",       "trace",
+    "try",     "unknown",   "unset",    "update",  "uplevel", "upvar",    "variable",   "vwait",
+    "while",   nullptr};
 
-} // namespace
+}  // namespace
 
 void tokenise_powershell(std::string_view s, const TokenSink& emit) {
     size_t i = 0, n = s.size();
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -65,7 +98,8 @@ void tokenise_powershell(std::string_view s, const TokenSink& emit) {
         if (c == '<' && i + 1 < n && s[i + 1] == '#') {
             // block comment <# ... #>
             size_t j = i + 2;
-            while (j + 1 < n && !(s[j] == '#' && s[j + 1] == '>')) ++j;
+            while (j + 1 < n && !(s[j] == '#' && s[j + 1] == '>'))
+                ++j;
             j = j + 1 < n ? j + 2 : n;
             emit_split_newlines(emit, TokenKind::Comment, s.substr(i, j - i));
             i = j;
@@ -75,12 +109,12 @@ void tokenise_powershell(std::string_view s, const TokenSink& emit) {
             size_t j = i + 1;
             if (j < n && s[j] == '{') {
                 ++j;
-                while (j < n && s[j] != '}') ++j;
-                if (j < n) ++j;
+                while (j < n && s[j] != '}')
+                    ++j;
+                if (j < n)
+                    ++j;
             } else {
-                j = scan_while(s, j, [](char ch) {
-                    return is_ident_cont(ch) || ch == ':';
-                });
+                j = scan_while(s, j, [](char ch) { return is_ident_cont(ch) || ch == ':'; });
             }
             emit(TokenKind::Variable, s.substr(i, j - i));
             i = j;
@@ -112,9 +146,12 @@ void tokenise_powershell(std::string_view s, const TokenSink& emit) {
             }
             std::string_view word = s.substr(i, j - i);
             TokenKind kk = TokenKind::Text;
-            if (in_keyword_set(word, KW_PS)) kk = TokenKind::Keyword;
-            else if (in_keyword_set(word, BI_PS)) kk = TokenKind::Builtin;
-            else if (word.find('-') != std::string_view::npos) kk = TokenKind::Function;
+            if (in_keyword_set(word, KW_PS))
+                kk = TokenKind::Keyword;
+            else if (in_keyword_set(word, BI_PS))
+                kk = TokenKind::Builtin;
+            else if (word.find('-') != std::string_view::npos)
+                kk = TokenKind::Function;
             emit(kk, word);
             i = j;
             continue;
@@ -134,7 +171,12 @@ void tokenise_tcl(std::string_view s, const TokenSink& emit) {
     bool at_bol = true;
     while (i < n) {
         char c = s[i];
-        if (c == '\n') { emit(TokenKind::Text, s.substr(i, 1)); ++i; at_bol = true; continue; }
+        if (c == '\n') {
+            emit(TokenKind::Text, s.substr(i, 1));
+            ++i;
+            at_bol = true;
+            continue;
+        }
         if (is_space(c)) {
             size_t j = scan_while(s, i, is_space);
             emit(TokenKind::Text, s.substr(i, j - i));
@@ -151,8 +193,10 @@ void tokenise_tcl(std::string_view s, const TokenSink& emit) {
             size_t j = i + 1;
             if (j < n && s[j] == '{') {
                 ++j;
-                while (j < n && s[j] != '}') ++j;
-                if (j < n) ++j;
+                while (j < n && s[j] != '}')
+                    ++j;
+                if (j < n)
+                    ++j;
             } else {
                 j = scan_while(s, j, is_ident_cont);
             }
@@ -179,7 +223,8 @@ void tokenise_tcl(std::string_view s, const TokenSink& emit) {
             size_t j = scan_ident(s, i);
             std::string_view word = s.substr(i, j - i);
             TokenKind kk = at_bol ? TokenKind::Function : TokenKind::Text;
-            if (in_keyword_set(word, KW_TCL)) kk = TokenKind::Keyword;
+            if (in_keyword_set(word, KW_TCL))
+                kk = TokenKind::Keyword;
             emit(kk, word);
             i = j;
             at_bol = false;
@@ -197,4 +242,4 @@ void tokenise_tcl(std::string_view s, const TokenSink& emit) {
     }
 }
 
-} // namespace rcat::lang
+}  // namespace rcat::lang
