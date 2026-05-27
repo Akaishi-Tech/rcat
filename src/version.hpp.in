@@ -1,0 +1,10 @@
+// SPDX-License-Identifier: GPL-3.0-or-later
+// Copyright (C) 2026 Akaishi Tech
+
+#pragma once
+
+namespace rcat {
+
+inline constexpr const char* kVersion = "@RCAT_VERSION@";
+
+} // namespace rcat

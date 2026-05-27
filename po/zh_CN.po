@@ -1,0 +1,217 @@
+# Simplified Chinese translation for rcat.
+# This file is distributed under the same license as the rcat package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rcat 0.1.0\n"
+"Report-Msgid-Bugs-To: hcgstd@proton.me\n"
+"POT-Creation-Date: 2026-05-27 19:03+0800\n"
+"PO-Revision-Date: 2026-05-27 02:15+0800\n"
+"Last-Translator: mahoshojoHCG <hcgstd@proton.me>\n"
+"Language-Team: Simplified Chinese\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/pager.cpp:361
+msgid "[h] help  [q] quit"
+msgstr "[h] 帮助  [q] 退出"
+
+#: src/pager.cpp:368
+msgid ""
+"Keys:\n"
+"  j  Down              scroll down one line\n"
+"  k  Up                scroll up one line\n"
+"  Space  f  PgDn       page down\n"
+"  b  PgUp              page up\n"
+"  d                    half page down\n"
+"  u                    half page up\n"
+"  g  Home              top of file\n"
+"  G  End               bottom of file\n"
+"  /pattern             search forward\n"
+"  ?pattern             search backward\n"
+"  n                    next match\n"
+"  N                    previous match\n"
+"  h                    this help\n"
+"  q                    quit\n"
+"\n"
+"Press any key to return."
+msgstr ""
+"按键：\n"
+"  j  Down              向下滚动一行\n"
+"  k  Up                向上滚动一行\n"
+"  Space  f  PgDn       下翻一页\n"
+"  b  PgUp              上翻一页\n"
+"  d                    下翻半页\n"
+"  u                    上翻半页\n"
+"  g  Home              跳到开头\n"
+"  G  End               跳到末尾\n"
+"  /pattern             向后搜索\n"
+"  ?pattern             向前搜索\n"
+"  n                    下一处匹配\n"
+"  N                    上一处匹配\n"
+"  h                    显示本帮助\n"
+"  q                    退出\n"
+"\n"
+"按任意键返回。"
+
+#: src/pager.cpp:481
+msgid "[Press any key to return]"
+msgstr "[按任意键返回]"
+
+#: src/pager.cpp:599
+msgid "Search cancelled"
+msgstr "已取消搜索"
+
+#: src/pager.cpp:611
+msgid "match at line"
+msgstr "匹配于第"
+
+#: src/pager.cpp:614 src/pager.cpp:628 src/pager.cpp:640
+msgid "Pattern not found"
+msgstr "未找到匹配项"
+
+#: src/pager.cpp:620 src/pager.cpp:632
+msgid "No previous search"
+msgstr "尚未进行过搜索"
+
+#: src/rcat.cpp:131
+msgid "Render Markdown — and many other source/config files — in the terminal."
+msgstr "在终端中渲染 Markdown，以及多种源代码与配置文件。"
+
+#: src/rcat.cpp:133
+msgid ""
+"Reads from stdin if no FILE is given (or FILE is '-').\n"
+"Image paths are resolved relative to each FILE's directory.\n"
+"Non-Markdown files (detected by extension or --lang) are rendered\n"
+"with syntax highlighting instead of through the Markdown parser."
+msgstr ""
+"未指定 FILE（或 FILE 为 '-'）时从标准输入读取。\n"
+"图片路径相对于每个 FILE 所在目录解析。\n"
+"非 Markdown 文件（按扩展名或 --lang 识别）使用语法高亮渲染，\n"
+"而不经过 Markdown 解析器。"
+
+#: src/rcat.cpp:139 src/rless.cpp:178
+msgid "show version and exit"
+msgstr "显示版本并退出"
+
+#: src/rcat.cpp:144 src/rless.cpp:183
+msgid "wrap to N columns (default: terminal width)"
+msgstr "按 N 列折行（默认：终端宽度）"
+
+#: src/rcat.cpp:149 src/rless.cpp:188
+msgid "no styling at all (just wrapped text)"
+msgstr "不输出任何样式（仅折行文本）"
+
+#: src/rcat.cpp:154 src/rless.cpp:193
+msgid "disable color (keep other styling/Unicode)"
+msgstr "禁用颜色（保留其它样式与 Unicode）"
+
+#: src/rcat.cpp:159
+msgid "emit colors even on non-TTY (e.g. piping to less -R)"
+msgstr "即便输出不是 TTY 也强制输出颜色（例如管道到 less -R）"
+
+#: src/rcat.cpp:164 src/rless.cpp:203
+msgid "disable OSC 8 hyperlinks even if supported"
+msgstr "即使支持也禁用 OSC 8 超链接"
+
+#: src/rcat.cpp:169 src/rless.cpp:208
+msgid "don't render inline images"
+msgstr "不渲染内联图片"
+
+#: src/rcat.cpp:174 src/rless.cpp:213
+msgid "download and render remote http(s) image URLs (off by default)"
+msgstr "下载并渲染远程 http(s) 图片（默认关闭）"
+
+#: src/rcat.cpp:179 src/rless.cpp:218
+msgid "seconds to wait per remote image fetch (default 10)"
+msgstr "每张远程图片的等待秒数（默认 10）"
+
+#: src/rcat.cpp:184 src/rless.cpp:223
+msgid "cap image height to N rows (default 20)"
+msgstr "将图片高度限制为 N 行（默认 20）"
+
+#: src/rcat.cpp:189 src/rless.cpp:228
+msgid "force ASCII-only output (no box-drawing/bullets)"
+msgstr "强制只输出 ASCII（不使用制表符与项目符号）"
+
+#: src/rcat.cpp:194 src/rless.cpp:233
+msgid "force color mode: auto|none|16|256|truecolor"
+msgstr "强制颜色模式：auto|none|16|256|truecolor"
+
+#: src/rcat.cpp:199
+msgid ""
+"force source language (e.g. python, json, cpp); use 'md' for Markdown, "
+"'list' to print every language"
+msgstr ""
+"强制指定源语言（如 python、json、cpp）；用 'md' 表示 Markdown，用 'list' 打印"
+"所有支持的语言"
+
+#: src/rcat.cpp:205 src/rless.cpp:249
+msgid ""
+"file(s); use '-' for stdin. Markdown by default, or any source/config file"
+msgstr ""
+"文件；使用 '-' 表示标准输入。默认按 Markdown 处理，也可为任意源代码或配置文件"
+
+#: src/rcat.cpp:213
+msgid "Try 'rcat --help' for more information."
+msgstr "运行 'rcat --help' 查看更多信息。"
+
+#: src/rcat.cpp:227 src/rless.cpp:271
+msgid "--columns must be >= 10"
+msgstr "--columns 必须 >= 10"
+
+#: src/rcat.cpp:234 src/rless.cpp:278
+msgid "--image-height must be >= 1"
+msgstr "--image-height 必须 >= 1"
+
+#: src/rcat.cpp:247 src/rless.cpp:291
+msgid "--web-timeout must be >= 1"
+msgstr "--web-timeout 必须 >= 1"
+
+#: src/rcat.cpp:259 src/rless.cpp:303
+msgid "invalid --color value"
+msgstr "无效的 --color 取值"
+
+#: src/rcat.cpp:300
+msgid "parse error"
+msgstr "解析错误"
+
+#: src/renderer.cpp:232 src/renderer.cpp:245
+msgid "image: "
+msgstr "图片: "
+
+# ----- rless -----
+#: src/rless.cpp:169
+msgid ""
+"Page through Markdown — and many other source/config files — in the terminal."
+msgstr "在终端中分页浏览 Markdown 及多种源代码与配置文件。"
+
+#: src/rless.cpp:172
+msgid ""
+"Reads from stdin if no FILE is given (or FILE is '-').\n"
+"When stdout is not a terminal, rless behaves like rcat and writes\n"
+"the rendered output without paging.\n"
+"Inside the pager, press 'h' for keybindings or 'q' to quit."
+msgstr ""
+"未指定 FILE（或 FILE 为 '-'）时从标准输入读取。\n"
+"当标准输出不是终端时，rless 的行为与 rcat 相同，\n"
+"直接输出渲染结果而不进入分页器。\n"
+"分页器内按 'h' 查看按键帮助，按 'q' 退出。"
+
+#: src/rless.cpp:198
+msgid "emit colors even on non-TTY (useful with --no-pager)"
+msgstr "即便输出不是 TTY 也强制输出颜色（与 --no-pager 一起使用更佳）"
+
+#: src/rless.cpp:238
+msgid "force source language (e.g. python, json, cpp); use 'md' for Markdown"
+msgstr "强制指定源语言（如 python、json、cpp）；用 'md' 表示 Markdown"
+
+#: src/rless.cpp:244
+msgid "never page: write the rendered output and exit (like rcat)"
+msgstr "不进入分页器：直接输出渲染结果并退出（与 rcat 行为一致）"
+
+#: src/rless.cpp:257
+msgid "Try 'rless --help' for more information."
+msgstr "运行 'rless --help' 查看更多信息。"

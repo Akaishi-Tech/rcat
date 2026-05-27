@@ -1,0 +1,49 @@
+name: Bug report
+description: Something rcat does that it shouldn't
+title: "bug: "
+labels: [bug, triage]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug!
+        For security issues please follow [SECURITY.md](../SECURITY.md) instead.
+  - type: input
+    id: version
+    attributes:
+      label: rcat version
+      description: Output of `rcat --version`
+      placeholder: "rcat 0.1.0-3-gabcdef"
+    validations: { required: true }
+  - type: input
+    id: terminal
+    attributes:
+      label: Terminal & OS
+      description: "Terminal, OS, and `echo \"$TERM $COLORTERM $LANG\"`"
+      placeholder: "Alacritty 0.13 on Arch; xterm-256color truecolor en_US.UTF-8"
+    validations: { required: true }
+  - type: textarea
+    id: input
+    attributes:
+      label: Minimal input
+      description: A small Markdown/source snippet that reproduces the problem
+      render: markdown
+    validations: { required: true }
+  - type: textarea
+    id: command
+    attributes:
+      label: Command line
+      description: The exact `rcat ...` invocation
+      render: bash
+    validations: { required: true }
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual output
+      description: Paste raw output, or attach a screenshot for visual issues
+    validations: { required: true }
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected output
+    validations: { required: true }

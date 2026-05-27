@@ -1,0 +1,215 @@
+.TH RCAT 1 "May 2026" "rcat" "User Commands"
+.SH NAME
+rcat \- render Markdown (and many other source/config files) in the terminal
+.SH SYNOPSIS
+.B rcat
+.RI [ OPTIONS "] [" FILE "...]"
+.SH DESCRIPTION
+.B rcat
+reads each
+.I FILE
+and writes a styled, terminal-friendly rendering to standard output. With no
+.I FILE,
+or when
+.I FILE
+is
+.RB ` - ',
+the standard input is used.
+.PP
+By default,
+.B rcat
+treats input as
+.B CommonMark
+Markdown (with GFM extensions: tables, task lists, autolinks, strikethrough).
+When the input filename does not look like Markdown \(em or when
+.B \-\-lang
+forces a different language \(em
+.B rcat
+falls back to its built-in syntax highlighter, which knows ~60 languages and
+configuration formats. Run
+.B rcat \-\-lang list
+to print every recognised alias.
+.PP
+Code fences inside Markdown are syntax-highlighted with the same engine.
+Images referenced from Markdown are decoded and rendered as Unicode
+half-block art via
+.B chafa
+when that library was linked at build time. Image paths are resolved
+relative to each
+.IR FILE 's
+directory; remote
+.B http(s)
+URLs are only fetched when
+.B \-\-allow\-web
+is given (and
+.B libcurl
+was linked at build time).
+.SH OPTIONS
+.TP
+.BR \-V ", " \-\-version
+Print version and exit.
+.TP
+.BR \-h ", " \-\-help
+Print a short help message (translated when a matching locale catalog is
+installed) and exit.
+.TP
+.BR \-c " " \fIN\fR ", " \-\-columns " " \fIN\fR
+Wrap output to
+.I N
+columns. Defaults to the terminal width as reported by
+.BR TIOCGWINSZ ,
+or to 80 if stdout is not a TTY. The
+.B COLUMNS
+environment variable overrides autodetection.
+Values below 10 are rejected.
+.TP
+.BR \-p ", " \-\-plain
+Strip all styling: no SGR escapes, no Unicode box-drawing, no hyperlinks.
+Output is just word-wrapped text.
+.TP
+.B \-\-no\-color
+Disable colour but keep other styling (Unicode bullets, headings, etc.).
+Equivalent to setting
+.BR NO_COLOR =1.
+.TP
+.B \-\-force\-color
+Emit colour even when stdout is not a TTY. Useful when piping into
+.B less \-R.
+.TP
+.B \-\-color " " \fIMODE\fR
+Force the colour mode. One of
+.BR auto ,
+.BR none ,
+.BR 16 ,
+.B 256
+or
+.BR truecolor .
+.B auto
+defers to terminal autodetection (the default).
+.TP
+.B \-\-no\-hyperlinks
+Never emit OSC 8 hyperlinks, even when the terminal advertises support.
+.TP
+.B \-\-no\-images
+Skip inline images even when image rendering was compiled in.
+.TP
+.B \-\-allow\-web
+Download and render
+.B http(s)
+image URLs. Off by default. Requires that
+.B libcurl
+was linked at build time. Each fetch is capped at the
+.B \-\-web\-timeout
+seconds and 16 MiB.
+.TP
+.B \-\-web\-timeout " " \fISEC\fR
+Per-image fetch timeout for
+.B \-\-allow\-web,
+in seconds. Default 10. Values below 1 are rejected.
+.TP
+.B \-\-image\-height " " \fIN\fR
+Cap rendered image height to
+.I N
+terminal rows. Default 20. Width scales to preserve aspect ratio.
+.TP
+.B \-\-ascii
+Force ASCII-only output. No box-drawing characters, no bullet glyphs;
+useful for legacy terminals or pipelines into ASCII-only tools.
+.TP
+.B \-\-lang " " \fILANG\fR
+Force the input language regardless of filename or extension. Use
+.B md
+or
+.B markdown
+to run the Markdown renderer explicitly. Use
+.B list
+to print every alias the highlighter recognises and exit.
+.SH ENVIRONMENT
+.TP
+.B NO_COLOR
+If set to any value, disables colour. Honoured even when stdout is a TTY.
+.TP
+.B COLUMNS
+Overrides the autodetected terminal width.
+.TP
+.BR LANG ", " LC_ALL ", " LC_CTYPE ", " LC_MESSAGES
+Drive locale selection for translated messages and Unicode detection. A
+locale whose codeset contains
+.B UTF-8
+or
+.B utf8
+enables Unicode box-drawing and bullets.
+.TP
+.B RCAT_LOCALEDIR
+Override the directory
+.B gettext
+searches for compiled message catalogs
+.RB ( rcat.mo ).
+Defaults to the install prefix's
+.B share/locale
+directory. Useful when running the binary out of a build tree.
+.TP
+.BR TERM ", " COLORTERM ", " TERM_PROGRAM ", " SSH_TTY ", " SSH_CONNECTION
+Used to detect colour depth, OSC 8 hyperlink support, and whether the
+session is over SSH.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+One or more input files could not be read or could not be parsed.
+.TP
+.B 2
+Invalid command-line usage (unknown option, malformed value).
+.SH EXAMPLES
+.PP
+Render this manual's source:
+.PP
+.RS
+.nf
+rcat README.md
+.fi
+.RE
+.PP
+Pretty-print any source file, like
+.B cat:
+.PP
+.RS
+.nf
+rcat src/rcat.cpp
+rcat Dockerfile
+rcat /etc/hosts
+.fi
+.RE
+.PP
+Pipe a remote document with colour preserved:
+.PP
+.RS
+.nf
+curl -fsSL https://example.com/post.md | rcat --force-color - | less -R
+.fi
+.RE
+.PP
+Force a specific language:
+.PP
+.RS
+.nf
+rcat --lang yaml config.txt
+.fi
+.RE
+.SH FILES
+.TP
+.I @CMAKE_INSTALL_FULL_LOCALEDIR@/<lang>/LC_MESSAGES/rcat.mo
+Compiled message catalogs for translated UI strings.
+.SH BUGS
+Report issues at the project's tracker. See
+.B SECURITY.md
+in the source tree for the responsible-disclosure process for security
+issues.
+.SH SEE ALSO
+.BR cat (1),
+.BR less (1),
+.BR md4c (3),
+.BR chafa (1),
+.BR locale (1).

@@ -1,0 +1,7 @@
+{
+  "name": "rcat",
+  "version": "0.1.0",
+  "languages": ["c", "python", "json", "yaml"],
+  "enabled": true,
+  "count": 42
+}

@@ -1,0 +1,242 @@
+.TH RLESS 1 "May 2026" "rcat" "User Commands"
+.SH NAME
+rless \- page through Markdown (and many other source/config files) in the terminal
+.SH SYNOPSIS
+.B rless
+.RI [ OPTIONS "] [" FILE "...]"
+.SH DESCRIPTION
+.B rless
+is a Markdown- and source-aware pager built on the same renderer as
+.BR rcat (1).
+It reads each
+.I FILE
+(or standard input when none is given), renders it with ANSI styling,
+Unicode box-drawing, OSC 8 hyperlinks, syntax highlighting, and inline
+images via
+.BR chafa ,
+and then drives an interactive viewport so you can scroll and search.
+.PP
+By default,
+.B rless
+treats input as
+.B CommonMark
+Markdown with GFM extensions. When the filename does not look like
+Markdown (or
+.B \-\-lang
+forces a different language), it falls back to the built-in syntax
+highlighter that knows ~60 languages and configuration formats.
+.PP
+When standard output is not a terminal, or
+.B \-\-no\-pager
+is given,
+.B rless
+behaves like
+.BR rcat (1)
+and writes the rendered output without entering the pager. This makes it
+safe to use in pipelines.
+.SH KEY BINDINGS
+While the pager is active, the following keys are recognised:
+.TP
+.BR j ", Down arrow"
+Scroll down one line.
+.TP
+.BR k ", Up arrow"
+Scroll up one line.
+.TP
+.BR Space ", " f ", PageDown"
+Scroll down one page.
+.TP
+.BR b ", PageUp"
+Scroll up one page.
+.TP
+.B d
+Scroll down half a page.
+.TP
+.B u
+Scroll up half a page.
+.TP
+.BR g ", Home"
+Jump to the top of the buffer.
+.TP
+.BR G ", End"
+Jump to the bottom of the buffer.
+.TP
+.B /
+Search forward. Type the pattern at the prompt and press Enter; ESC
+cancels. The match is ASCII case-insensitive and applied to the
+ANSI-stripped visible text of each line.
+.TP
+.B ?
+Search backward. Same prompt semantics as
+.BR / .
+.TP
+.B n
+Jump to the next match in the search direction.
+.TP
+.B N
+Jump to the previous match in the search direction.
+.TP
+.BR h ", " H
+Show in-pager help. Press any key to dismiss.
+.TP
+.BR q ", Q, Ctrl-C"
+Quit the pager.
+.SH OPTIONS
+.TP
+.BR \-V ", " \-\-version
+Print version and exit.
+.TP
+.BR \-h ", " \-\-help
+Print a short help message (translated when a matching locale catalog is
+installed) and exit.
+.TP
+.BR \-c " " \fIN\fR ", " \-\-columns " " \fIN\fR
+Wrap output to
+.I N
+columns. Defaults to the terminal width as reported by
+.B /dev/tty
+(via
+.BR TIOCGWINSZ ),
+or to 80 if no controlling terminal is available. Values below 10 are
+rejected. When the terminal is resized, the buffer is automatically
+re-wrapped to the new width.
+.TP
+.BR \-p ", " \-\-plain
+Strip all styling: no SGR escapes, no Unicode box-drawing, no hyperlinks.
+The pager UI is still drawn, but with a plain status bar.
+.TP
+.B \-\-no\-color
+Disable colour but keep other styling (Unicode bullets, headings, etc.).
+.TP
+.B \-\-no\-hyperlinks
+Never emit OSC 8 hyperlinks, even when the terminal advertises support.
+.TP
+.B \-\-no\-images
+Skip inline images even when image rendering was compiled in.
+.TP
+.B \-\-allow\-web
+Download and render
+.B http(s)
+image URLs. Off by default. Requires
+.B libcurl
+at build time.
+.TP
+.B \-\-web\-timeout " " \fISEC\fR
+Per-image fetch timeout for
+.BR \-\-allow\-web ,
+in seconds. Default 10.
+.TP
+.B \-\-image\-height " " \fIN\fR
+Cap rendered image height to
+.I N
+terminal rows. Default 20.
+.TP
+.B \-\-ascii
+Force ASCII-only output. No box-drawing characters, no bullet glyphs.
+.TP
+.B \-\-color " " \fIMODE\fR
+Force the colour mode. One of
+.BR auto ,
+.BR none ,
+.BR 16 ,
+.B 256
+or
+.BR truecolor .
+.B auto
+defers to terminal autodetection (the default).
+.TP
+.B \-\-lang " " \fILANG\fR
+Force the input language regardless of filename or extension. Use
+.B md
+or
+.B markdown
+to run the Markdown renderer explicitly.
+.TP
+.B \-\-no\-pager
+Skip the pager and write the rendered output to standard output, even
+when standard output is a terminal. Equivalent to using
+.BR rcat (1)
+with the same arguments.
+.SH ENVIRONMENT
+.TP
+.B NO_COLOR
+If set to any value, disables colour.
+.TP
+.B COLUMNS
+Overrides the autodetected terminal width.
+.TP
+.BR LANG ", " LC_ALL ", " LC_CTYPE ", " LC_MESSAGES
+Drive locale selection for translated messages and Unicode detection.
+.TP
+.B RCAT_LOCALEDIR
+Override the directory
+.B gettext
+searches for compiled message catalogs
+.RB ( rcat.mo ).
+.TP
+.BR TERM ", " COLORTERM ", " TERM_PROGRAM ", " SSH_TTY ", " SSH_CONNECTION
+Used to detect colour depth, OSC 8 hyperlink support, and whether the
+session is over SSH.
+.SH EXIT STATUS
+.TP
+.B 0
+Success.
+.TP
+.B 1
+One or more input files could not be read or could not be parsed, or the
+controlling terminal could not be opened.
+.TP
+.B 2
+Invalid command-line usage (unknown option, malformed value).
+.SH EXAMPLES
+.PP
+Page through this manual's README:
+.PP
+.RS
+.nf
+rless README.md
+.fi
+.RE
+.PP
+Page through a source file with syntax highlighting:
+.PP
+.RS
+.nf
+rless src/rless.cpp
+.fi
+.RE
+.PP
+Page through stdin (e.g. a remote document):
+.PP
+.RS
+.nf
+curl -fsSL https://example.com/post.md | rless
+.fi
+.RE
+.PP
+Behave like
+.BR rcat (1)
+\(em render and exit without entering the pager:
+.PP
+.RS
+.nf
+rless --no-pager README.md
+.fi
+.RE
+.SH FILES
+.TP
+.I @CMAKE_INSTALL_FULL_LOCALEDIR@/<lang>/LC_MESSAGES/rcat.mo
+Compiled message catalogs.
+.B rless
+shares the
+.B rcat
+catalog.
+.SH BUGS
+Report issues at the project's tracker.
+.SH SEE ALSO
+.BR rcat (1),
+.BR less (1),
+.BR more (1),
+.BR md4c (3),
+.BR chafa (1),
+.BR locale (1).

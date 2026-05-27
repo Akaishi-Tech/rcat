@@ -1,0 +1,205 @@
+# Spanish translation for rcat.
+# This file is distributed under the same license as the rcat package.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: rcat 0.1.0\n"
+"Report-Msgid-Bugs-To: hcgstd@proton.me\n"
+"POT-Creation-Date: 2026-05-27 19:03+0800\n"
+"PO-Revision-Date: 2026-05-27 02:15+0800\n"
+"Last-Translator: mahoshojoHCG <hcgstd@proton.me>\n"
+"Language-Team: Spanish\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: src/pager.cpp:361
+msgid "[h] help  [q] quit"
+msgstr ""
+
+#: src/pager.cpp:368
+msgid ""
+"Keys:\n"
+"  j  Down              scroll down one line\n"
+"  k  Up                scroll up one line\n"
+"  Space  f  PgDn       page down\n"
+"  b  PgUp              page up\n"
+"  d                    half page down\n"
+"  u                    half page up\n"
+"  g  Home              top of file\n"
+"  G  End               bottom of file\n"
+"  /pattern             search forward\n"
+"  ?pattern             search backward\n"
+"  n                    next match\n"
+"  N                    previous match\n"
+"  h                    this help\n"
+"  q                    quit\n"
+"\n"
+"Press any key to return."
+msgstr ""
+
+#: src/pager.cpp:481
+msgid "[Press any key to return]"
+msgstr ""
+
+#: src/pager.cpp:599
+msgid "Search cancelled"
+msgstr ""
+
+#: src/pager.cpp:611
+msgid "match at line"
+msgstr ""
+
+#: src/pager.cpp:614 src/pager.cpp:628 src/pager.cpp:640
+msgid "Pattern not found"
+msgstr ""
+
+#: src/pager.cpp:620 src/pager.cpp:632
+msgid "No previous search"
+msgstr ""
+
+#: src/rcat.cpp:131
+msgid "Render Markdown — and many other source/config files — in the terminal."
+msgstr ""
+"Renderiza Markdown y muchos otros archivos de código y configuración en la "
+"terminal."
+
+#: src/rcat.cpp:133
+msgid ""
+"Reads from stdin if no FILE is given (or FILE is '-').\n"
+"Image paths are resolved relative to each FILE's directory.\n"
+"Non-Markdown files (detected by extension or --lang) are rendered\n"
+"with syntax highlighting instead of through the Markdown parser."
+msgstr ""
+"Lee de la entrada estándar si no se da FILE (o FILE es '-').\n"
+"Las rutas de imagen se resuelven respecto al directorio de cada FILE.\n"
+"Los archivos no-Markdown (detectados por extensión o --lang) se\n"
+"renderizan con resaltado de sintaxis en lugar de pasar por el parser."
+
+#: src/rcat.cpp:139 src/rless.cpp:178
+msgid "show version and exit"
+msgstr "muestra la versión y sale"
+
+#: src/rcat.cpp:144 src/rless.cpp:183
+msgid "wrap to N columns (default: terminal width)"
+msgstr "ajusta el texto a N columnas (por defecto: ancho de la terminal)"
+
+#: src/rcat.cpp:149 src/rless.cpp:188
+msgid "no styling at all (just wrapped text)"
+msgstr "sin ningún formato (solo texto ajustado)"
+
+#: src/rcat.cpp:154 src/rless.cpp:193
+msgid "disable color (keep other styling/Unicode)"
+msgstr "desactiva el color (conserva el resto de formato y Unicode)"
+
+#: src/rcat.cpp:159
+msgid "emit colors even on non-TTY (e.g. piping to less -R)"
+msgstr ""
+"emite colores incluso si la salida no es un TTY (por ejemplo, con less -R)"
+
+#: src/rcat.cpp:164 src/rless.cpp:203
+msgid "disable OSC 8 hyperlinks even if supported"
+msgstr "desactiva los hipervínculos OSC 8 aunque estén disponibles"
+
+#: src/rcat.cpp:169 src/rless.cpp:208
+msgid "don't render inline images"
+msgstr "no renderiza las imágenes en línea"
+
+#: src/rcat.cpp:174 src/rless.cpp:213
+msgid "download and render remote http(s) image URLs (off by default)"
+msgstr ""
+"descarga y renderiza URLs de imagen http(s) remotas (desactivado por defecto)"
+
+#: src/rcat.cpp:179 src/rless.cpp:218
+msgid "seconds to wait per remote image fetch (default 10)"
+msgstr "segundos de espera por cada descarga de imagen remota (por defecto 10)"
+
+#: src/rcat.cpp:184 src/rless.cpp:223
+msgid "cap image height to N rows (default 20)"
+msgstr "limita la altura de imagen a N filas (por defecto 20)"
+
+#: src/rcat.cpp:189 src/rless.cpp:228
+msgid "force ASCII-only output (no box-drawing/bullets)"
+msgstr "fuerza salida solo ASCII (sin caracteres de cuadro/viñetas)"
+
+#: src/rcat.cpp:194 src/rless.cpp:233
+msgid "force color mode: auto|none|16|256|truecolor"
+msgstr "fuerza el modo de color: auto|none|16|256|truecolor"
+
+#: src/rcat.cpp:199
+msgid ""
+"force source language (e.g. python, json, cpp); use 'md' for Markdown, "
+"'list' to print every language"
+msgstr ""
+
+#: src/rcat.cpp:205 src/rless.cpp:249
+msgid ""
+"file(s); use '-' for stdin. Markdown by default, or any source/config file"
+msgstr ""
+
+#: src/rcat.cpp:213
+msgid "Try 'rcat --help' for more information."
+msgstr "Ejecuta 'rcat --help' para más información."
+
+#: src/rcat.cpp:227 src/rless.cpp:271
+msgid "--columns must be >= 10"
+msgstr "--columns debe ser >= 10"
+
+#: src/rcat.cpp:234 src/rless.cpp:278
+msgid "--image-height must be >= 1"
+msgstr "--image-height debe ser >= 1"
+
+#: src/rcat.cpp:247 src/rless.cpp:291
+msgid "--web-timeout must be >= 1"
+msgstr "--web-timeout debe ser >= 1"
+
+#: src/rcat.cpp:259 src/rless.cpp:303
+msgid "invalid --color value"
+msgstr "valor de --color no válido"
+
+#: src/rcat.cpp:300
+msgid "parse error"
+msgstr "error de análisis"
+
+#: src/renderer.cpp:232 src/renderer.cpp:245
+msgid "image: "
+msgstr "imagen: "
+
+#: src/rless.cpp:169
+#, fuzzy
+msgid ""
+"Page through Markdown — and many other source/config files — in the terminal."
+msgstr ""
+"Renderiza Markdown y muchos otros archivos de código y configuración en la "
+"terminal."
+
+#: src/rless.cpp:172
+msgid ""
+"Reads from stdin if no FILE is given (or FILE is '-').\n"
+"When stdout is not a terminal, rless behaves like rcat and writes\n"
+"the rendered output without paging.\n"
+"Inside the pager, press 'h' for keybindings or 'q' to quit."
+msgstr ""
+
+#: src/rless.cpp:198
+#, fuzzy
+msgid "emit colors even on non-TTY (useful with --no-pager)"
+msgstr ""
+"emite colores incluso si la salida no es un TTY (por ejemplo, con less -R)"
+
+#: src/rless.cpp:238
+msgid "force source language (e.g. python, json, cpp); use 'md' for Markdown"
+msgstr ""
+
+#: src/rless.cpp:244
+msgid "never page: write the rendered output and exit (like rcat)"
+msgstr ""
+
+#: src/rless.cpp:257
+#, fuzzy
+msgid "Try 'rless --help' for more information."
+msgstr "Ejecuta 'rcat --help' para más información."
+
+#~ msgid "Markdown file(s); use '-' for stdin"
+#~ msgstr "archivo(s) Markdown; usa '-' para la entrada estándar"

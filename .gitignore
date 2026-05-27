@@ -1,0 +1,146 @@
+# ============================================================================
+# Based on the GitHub gitignore templates for C++, CMake, Linux, and macOS
+# (https://github.com/github/gitignore), with project-specific additions.
+# ============================================================================
+
+# ---- C++ -------------------------------------------------------------------
+# Prerequisites
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Linker files
+*.ilk
+
+# Debugger Files
+*.pdb
+
+# Compiled Dynamic libraries
+*.so
+*.dylib
+*.dll
+*.so.*
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Build directories
+build/
+Build/
+build-*/
+
+# Temporary files
+*.tmp
+*.log
+*.bak
+*.swp
+
+# vcpkg
+vcpkg_installed/
+
+# debug information files
+*.dwo
+
+# test output & cache
+Testing/
+.cache/
+
+# ---- CMake -----------------------------------------------------------------
+CMakeLists.txt.user
+CMakeCache.txt
+CMakeFiles
+CMakeScripts
+Makefile
+cmake_install.cmake
+install_manifest.txt
+compile_commands.json
+CTestTestfile.cmake
+_deps
+CMakeUserPresets.json
+cmake-build-*/
+
+# ---- Linux -----------------------------------------------------------------
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+nohup.out
+
+# ---- macOS -----------------------------------------------------------------
+.DS_Store
+.localized
+__MACOSX/
+.AppleDouble
+.LSOverride
+Icon
+
+# Resource forks
+._*
+
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.com.apple.timemachine.supported
+
+# ---- Windows ---------------------------------------------------------------
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# ---- Editors / IDEs --------------------------------------------------------
+.idea/
+.vscode/
+*.code-workspace
+.vs/
+.cproject
+.project
+.settings/
+*.swo
+
+# ---- Coverage / sanitizer artifacts ----------------------------------------
+*.gcda
+*.gcno
+*.gcov
+coverage/
+coverage.info
+*.profraw
+*.profdata
+core
+core.*
+*.dSYM/
+
+# ---- Project-specific ------------------------------------------------------
+out/
+install/
+dist/
+
+# Local secrets / overrides
+.env
+.envrc
+*.local

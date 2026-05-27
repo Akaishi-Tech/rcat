@@ -1,0 +1,155 @@
+name: ci
+
+on:
+  push:
+    branches: [main, master]
+    tags: ['v*']
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+
+# Cancel in-flight runs of the same workflow on the same ref when a new
+# commit lands — keeps CI from queueing on a force-push.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: ${{ matrix.os }} / ${{ matrix.compiler }} / ${{ matrix.build_type }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-22.04, ubuntu-24.04, macos-14]
+        compiler: [gcc, clang]
+        build_type: [Debug, Release]
+        exclude:
+          - os: macos-14
+            compiler: gcc
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # git describe needs full history
+
+      - name: Install dependencies (Ubuntu)
+        if: startsWith(matrix.os, 'ubuntu-')
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              cmake ninja-build pkg-config \
+              libmd4c-dev libargparse-dev \
+              libchafa-dev libstb-dev libcurl4-openssl-dev \
+              gettext locales
+
+          sudo locale-gen zh_CN.UTF-8 en_US.UTF-8
+
+      - name: Install dependencies (macOS)
+        if: startsWith(matrix.os, 'macos-')
+        run: |
+          brew update
+          brew install cmake ninja pkg-config md4c argparse chafa stb \
+                       gettext curl
+
+      - name: Select compiler
+        run: |
+          if [ "${{ matrix.compiler }}" = "clang" ]; then
+            echo "CC=clang"  >> "$GITHUB_ENV"
+            echo "CXX=clang++" >> "$GITHUB_ENV"
+          else
+            echo "CC=gcc"  >> "$GITHUB_ENV"
+            echo "CXX=g++" >> "$GITHUB_ENV"
+          fi
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DRCAT_WARNINGS_AS_ERRORS=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        run: ctest --test-dir build --output-on-failure --parallel
+
+      - name: Install (smoke)
+        run: |
+          DESTDIR="$PWD/_install" cmake --install build
+          find _install -maxdepth 5 -type f | sort
+
+  sanitizers:
+    name: ubuntu-24.04 / ${{ matrix.preset }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        preset: [asan, tsan]
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              cmake ninja-build pkg-config \
+              libmd4c-dev libargparse-dev \
+              libchafa-dev libstb-dev libcurl4-openssl-dev gettext
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ \
+            -DRCAT_ENABLE_${{ matrix.preset == 'asan' && 'ASAN' || 'TSAN' }}=ON
+
+      - name: Build
+        run: cmake --build build --parallel
+
+      - name: Test
+        env:
+          ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+          UBSAN_OPTIONS: print_stacktrace=1:halt_on_error=1
+        run: ctest --test-dir build --output-on-failure --parallel
+
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install clang-format
+        run: sudo apt-get update && sudo apt-get install -y clang-format
+      - name: Check formatting
+        run: |
+          mapfile -t files < <(git ls-files 'src/**/*.cpp' 'src/**/*.hpp' \
+                                            'tests/*.cpp' 'tests/*.hpp')
+          if [ ${#files[@]} -eq 0 ]; then exit 0; fi
+          clang-format --dry-run --Werror "${files[@]}"
+
+  tidy:
+    name: clang-tidy
+    runs-on: ubuntu-24.04
+    continue-on-error: true  # advisory until the codebase is fully clean
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              cmake ninja-build pkg-config clang-tidy \
+              libmd4c-dev libargparse-dev libchafa-dev libstb-dev \
+              libcurl4-openssl-dev gettext
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Debug \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
+            -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++
+      - name: Build (codegen for tidy)
+        run: cmake --build build --target rcat_translations --parallel || true
+      - name: Run clang-tidy
+        run: |
+          mapfile -t files < <(git ls-files 'src/**/*.cpp')
+          clang-tidy -p build "${files[@]}"

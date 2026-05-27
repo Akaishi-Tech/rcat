@@ -1,0 +1,45 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  source-tarball:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+              cmake ninja-build pkg-config \
+              libmd4c-dev libargparse-dev \
+              libchafa-dev libstb-dev libcurl4-openssl-dev gettext
+      - name: Configure
+        run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+      - name: Package
+        run: cmake --build build --target package package_source --parallel
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: rcat-packages
+          path: |
+            build/*.tar.gz
+            build/*.deb
+            build/*.rpm
+      - name: Attach to release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/*.tar.gz
+            build/*.deb
+            build/*.rpm
+          fail_on_unmatched_files: false
+          generate_release_notes: true
