@@ -20,7 +20,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
               cmake ninja-build pkg-config \
               libmd4c-dev libargparse-dev \
-              libchafa-dev libstb-dev libcurl4-openssl-dev gettext
+              libchafa-dev libglib2.0-dev libstb-dev libcurl4-openssl-dev gettext
       - name: Configure
         run: cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
       - name: Package
